@@ -26,10 +26,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialisiere Datenbank beim Start
-@app.on_event("startup")
-async def startup_event():
-    init_database()
+# Initialisiere Datenbank beim Start (für Vercel)
+# Vercel führt Startup-Events nicht zuverlässig aus, daher initialisieren wir bei Bedarf
+_db_initialized = False
+
+def ensure_db_initialized():
+    global _db_initialized
+    if not _db_initialized:
+        try:
+            init_database()
+            _db_initialized = True
+        except Exception as e:
+            print(f"Database initialization error: {e}")
+            # Bei Fehler trotzdem fortfahren (DB könnte bereits existieren)
+            _db_initialized = True
 
 # Serve static files
 if os.path.exists("public"):
@@ -73,19 +83,45 @@ class SaleCreate(BaseModel):
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """Serve Frontend"""
-    if os.path.exists("public/index.html"):
-        with open("public/index.html", "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
-    return HTMLResponse(content="<h1>Beauty CRM API</h1><p>Frontend nicht gefunden</p>")
+    try:
+        # Versuche verschiedene Pfade
+        paths = [
+            "public/index.html",
+            "index.html",
+            os.path.join(os.path.dirname(__file__), "public", "index.html"),
+            os.path.join(os.path.dirname(__file__), "index.html")
+        ]
+        
+        for path in paths:
+            if os.path.exists(path):
+                with open(path, "r", encoding="utf-8") as f:
+                    return HTMLResponse(content=f.read())
+        
+        # Fallback HTML
+        return HTMLResponse(content="""
+        <!DOCTYPE html>
+        <html>
+        <head><title>Beauty CRM</title></head>
+        <body>
+            <h1>Beauty CRM API</h1>
+            <p>Frontend wird geladen...</p>
+            <p><a href="/api/health">API Health Check</a></p>
+        </body>
+        </html>
+        """)
+    except Exception as e:
+        return HTMLResponse(content=f"<h1>Error</h1><p>{str(e)}</p>")
 
 @app.get("/api/health")
 async def health():
-    return {"status": "ok"}
+    ensure_db_initialized()
+    return {"status": "ok", "database": "initialized"}
 
 # Customers
 @app.get("/api/customers")
 async def get_customers():
     """Holt alle Kunden"""
+    ensure_db_initialized()
     return execute_query("SELECT * FROM customers ORDER BY last_name, first_name")
 
 @app.get("/api/customers/{customer_id}")
@@ -275,3 +311,6 @@ async def get_revenue_stats(days: int = 7):
         ORDER BY sale_date
     """, (days,))
 
+
+# Export für Vercel
+__all__ = ['app']
