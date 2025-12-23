@@ -49,7 +49,8 @@ Thumbs.db
 *.sqlite3
 
 # Streamlit
-.streamlit/
+.streamlit/*
+!.streamlit/config.toml
 
 # Logs
 *.log
