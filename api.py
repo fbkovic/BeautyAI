@@ -733,9 +733,12 @@ async def get_week_calendar(start_date: str):
 @app.get("/api/ai/status")
 async def ai_status():
     """Prüft Ollama Status"""
+    from ai_assistant import OLLAMA_BASE_URL
+    available = check_ollama_available()
     return {
-        "available": check_ollama_available(),
-        "models": get_available_models() if check_ollama_available() else []
+        "available": available,
+        "models": get_available_models() if available else [],
+        "ollama_url": OLLAMA_BASE_URL if available else None
     }
 
 @app.post("/api/ai/chat")

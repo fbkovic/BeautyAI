@@ -8,7 +8,10 @@ from typing import Optional, List, Dict
 from datetime import datetime
 import os
 
-OLLAMA_BASE_URL = "http://localhost:11434"
+# Ollama URL - kann über Environment-Variable konfiguriert werden
+# Für lokale Entwicklung: http://localhost:11434
+# Für Cloud: https://your-ollama-server.com
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 
 def check_ollama_available() -> bool:
     """Prüft ob Ollama läuft"""
