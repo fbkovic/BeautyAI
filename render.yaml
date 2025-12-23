@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: ollama-service
+    env: docker
+    dockerfilePath: ./Dockerfile.ollama
+    dockerContext: .
+    plan: free
+    buildCommand: ""
+    startCommand: ollama serve
+    envVars:
+      - key: OLLAMA_HOST
+        value: 0.0.0.0
+    healthCheckPath: /api/tags
+
