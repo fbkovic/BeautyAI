@@ -18,162 +18,161 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Modernes CSS Design
+# Dark Mode Design
 st.markdown("""
     <style>
-    /* Hauptdesign */
+    /* Hauptdesign - Dark Mode */
     .stApp {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #0e1117;
+        color: #fafafa;
     }
     
     .main-header {
-        font-size: 3rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #fafafa;
         text-align: center;
         margin-bottom: 2rem;
         padding: 1rem;
     }
     
-    /* Sidebar Design */
+    /* Sidebar Design - Dark */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+        background: #1e1e1e;
+        border-right: 1px solid #333333;
     }
     
     [data-testid="stSidebar"] .stSelectbox label,
     [data-testid="stSidebar"] .stMarkdown {
-        color: white !important;
+        color: #fafafa !important;
     }
     
-    /* Metric Cards */
+    /* Metric Cards - Dark Mode */
     [data-testid="stMetricValue"] {
         font-size: 2rem !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
+        color: #fafafa !important;
     }
     
     [data-testid="stMetricLabel"] {
         font-size: 0.9rem !important;
-        opacity: 0.8;
+        color: #b0b0b0 !important;
     }
     
-    /* Buttons */
+    /* Buttons - Dark Mode */
     .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        padding: 0.5rem 2rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        background: #262730;
+        color: #fafafa;
+        border: 1px solid #3a3a4a;
+        border-radius: 6px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
     }
     
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        background: #3a3a4a;
+        border-color: #4a4a5a;
     }
     
-    /* Tabs */
+    /* Primary Buttons */
+    .stButton > button[kind="primary"] {
+        background: #ff4b4b;
+        border-color: #ff4b4b;
+    }
+    
+    .stButton > button[kind="primary"]:hover {
+        background: #ff6b6b;
+        border-color: #ff6b6b;
+    }
+    
+    /* Tabs - Dark Mode */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        padding: 5px;
+        gap: 4px;
+        background-color: #1e1e1e;
+        border-radius: 6px;
+        padding: 4px;
     }
     
     .stTabs [data-baseweb="tab"] {
-        border-radius: 8px;
-        padding: 10px 20px;
+        border-radius: 4px;
+        padding: 8px 16px;
         background-color: transparent;
-        color: #667eea;
-        font-weight: 600;
+        color: #b0b0b0;
+        font-weight: 500;
     }
     
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: #262730;
+        color: #fafafa;
+        border: 1px solid #3a3a4a;
     }
     
-    /* Cards */
+    /* Cards - Dark Mode */
     .card {
-        background: white;
-        border-radius: 15px;
+        background: #1e1e1e;
+        border-radius: 8px;
         padding: 1.5rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         margin-bottom: 1rem;
-        transition: all 0.3s ease;
+        border: 1px solid #333333;
     }
     
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    }
     
-    /* Input Fields */
-    .stTextInput > div > div > input,
-    .stSelectbox > div > div > select,
-    .stDateInput > div > div > input {
-        border-radius: 10px;
-        border: 2px solid #e0e0e0;
-        padding: 0.5rem;
-    }
-    
-    .stTextInput > div > div > input:focus,
-    .stSelectbox > div > div > select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    
-    /* Dataframes */
+    /* Dataframes - Clean */
     .dataframe {
-        border-radius: 10px;
+        border-radius: 6px;
         overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e0e0e0;
     }
     
-    /* Success/Error Messages */
+    /* Success/Error Messages - Dezente Farben */
     .stSuccess {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        color: white;
-        border-radius: 10px;
+        background: #d4edda;
+        color: #155724;
+        border-radius: 6px;
         padding: 1rem;
+        border-left: 4px solid #28a745;
     }
     
     .stError {
-        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
-        color: white;
-        border-radius: 10px;
+        background: #f8d7da;
+        color: #721c24;
+        border-radius: 6px;
         padding: 1rem;
+        border-left: 4px solid #dc3545;
     }
     
     .stInfo {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        color: white;
-        border-radius: 10px;
+        background: #d1ecf1;
+        color: #0c5460;
+        border-radius: 6px;
         padding: 1rem;
+        border-left: 4px solid #17a2b8;
     }
     
     .stWarning {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-        border-radius: 10px;
+        background: #fff3cd;
+        color: #856404;
+        border-radius: 6px;
         padding: 1rem;
+        border-left: 4px solid #ffc107;
     }
     
-    /* Expander */
+    /* Expander - Clean */
     .streamlit-expanderHeader {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 10px;
+        background: #f8f9fa;
+        color: #2c3e50;
+        border-radius: 6px;
         padding: 1rem;
-        font-weight: 600;
+        font-weight: 500;
+        border: 1px solid #e0e0e0;
     }
     
     /* Radio Buttons */
     .stRadio > label {
-        font-weight: 600;
+        font-weight: 500;
+        color: #2c3e50;
     }
     
     /* Hide Streamlit Menu */
@@ -181,23 +180,48 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* Custom Scrollbar */
+    /* Custom Scrollbar - Dezente Farben */
     ::-webkit-scrollbar {
-        width: 10px;
+        width: 8px;
     }
     
     ::-webkit-scrollbar-track {
         background: #f1f1f1;
-        border-radius: 10px;
     }
     
     ::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 10px;
+        background: #bdc3c7;
+        border-radius: 4px;
     }
     
     ::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        background: #95a5a6;
+    }
+    
+    /* Überschriften */
+    h1, h2, h3 {
+        color: #fafafa;
+        font-weight: 600;
+    }
+    
+    /* Text */
+    p, span, div {
+        color: #e0e0e0;
+    }
+    
+    /* Main Content Background */
+    .main .block-container {
+        background: #0e1117;
+        color: #fafafa;
+    }
+    
+    /* Streamlit Elemente - Dark Mode */
+    .stMarkdown {
+        color: #fafafa;
+    }
+    
+    .stText {
+        color: #fafafa;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -207,12 +231,12 @@ if 'db_initialized' not in st.session_state:
     init_database()
     st.session_state.db_initialized = True
 
-# Moderne Sidebar Navigation
+# Dark Mode Sidebar Navigation
 st.sidebar.markdown("""
-    <div style='text-align: center; padding: 1rem 0;'>
-        <h1 style='color: white; font-size: 2rem; margin: 0;'>💇‍♀️</h1>
-        <h2 style='color: white; font-size: 1.5rem; margin: 0.5rem 0; font-weight: 700;'>Salon CRM</h2>
-        <p style='color: rgba(255,255,255,0.8); font-size: 0.9rem; margin: 0;'>Beauty Management</p>
+    <div style='text-align: center; padding: 1.5rem 0; border-bottom: 1px solid #333333; margin-bottom: 1rem;'>
+        <h1 style='color: #fafafa; font-size: 2rem; margin: 0;'>💇‍♀️</h1>
+        <h2 style='color: #fafafa; font-size: 1.3rem; margin: 0.5rem 0; font-weight: 600;'>Salon CRM</h2>
+        <p style='color: #b0b0b0; font-size: 0.85rem; margin: 0;'>Beauty Management</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -238,9 +262,9 @@ page = st.sidebar.radio(
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("""
-    <div style='text-align: center; padding: 1rem 0; color: rgba(255,255,255,0.7); font-size: 0.8rem;'>
-        <p>Version 2.0</p>
-        <p>© 2025 Salon CRM</p>
+    <div style='text-align: center; padding: 1rem 0; color: #808080; font-size: 0.75rem; border-top: 1px solid #333333; margin-top: 1rem;'>
+        <p style='margin: 0.25rem 0;'>Version 2.0</p>
+        <p style='margin: 0.25rem 0;'>© 2025 Salon CRM</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -316,7 +340,7 @@ if page == "📊 Dashboard":
     st.markdown("""
         <div style='text-align: center; padding: 2rem 0;'>
             <h1 class="main-header">💇‍♀️ Salon CRM Beauty</h1>
-            <p style='font-size: 1.2rem; color: #666; margin-top: -1rem;'>Willkommen zurück! Hier ist Ihre Übersicht.</p>
+            <p style='font-size: 1.1rem; color: #7f8c8d; margin-top: -1rem;'>Willkommen zurück! Hier ist Ihre Übersicht.</p>
         </div>
     """, unsafe_allow_html=True)
     
@@ -327,37 +351,37 @@ if page == "📊 Dashboard":
     
     with col1:
         st.markdown(f"""
-            <div class="card" style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; padding: 1.5rem;'>
-                <div style='font-size: 2.5rem; margin-bottom: 0.5rem;'>📅</div>
-                <div style='font-size: 2rem; font-weight: 700;'>{stats['appointments']}</div>
-                <div style='font-size: 0.9rem; opacity: 0.9;'>Heutige Termine</div>
+            <div class="card" style='background: #ffffff; text-align: center; padding: 1.5rem; border-left: 4px solid #2c3e50;'>
+                <div style='font-size: 2rem; margin-bottom: 0.5rem; color: #2c3e50;'>📅</div>
+                <div style='font-size: 2rem; font-weight: 600; color: #2c3e50;'>{stats['appointments']}</div>
+                <div style='font-size: 0.85rem; color: #7f8c8d; margin-top: 0.5rem;'>Heutige Termine</div>
             </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown(f"""
-            <div class="card" style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; text-align: center; padding: 1.5rem;'>
-                <div style='font-size: 2.5rem; margin-bottom: 0.5rem;'>✅</div>
-                <div style='font-size: 2rem; font-weight: 700;'>{stats['open_appointments']}</div>
-                <div style='font-size: 0.9rem; opacity: 0.9;'>Offene Termine</div>
+            <div class="card" style='background: #ffffff; text-align: center; padding: 1.5rem; border-left: 4px solid #2c3e50;'>
+                <div style='font-size: 2rem; margin-bottom: 0.5rem; color: #2c3e50;'>✅</div>
+                <div style='font-size: 2rem; font-weight: 600; color: #2c3e50;'>{stats['open_appointments']}</div>
+                <div style='font-size: 0.85rem; color: #7f8c8d; margin-top: 0.5rem;'>Offene Termine</div>
             </div>
         """, unsafe_allow_html=True)
     
     with col3:
         st.markdown(f"""
-            <div class="card" style='background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; text-align: center; padding: 1.5rem;'>
-                <div style='font-size: 2.5rem; margin-bottom: 0.5rem;'>💰</div>
-                <div style='font-size: 2rem; font-weight: 700;'>{stats['sales_count']}</div>
-                <div style='font-size: 0.9rem; opacity: 0.9;'>Verkäufe heute</div>
+            <div class="card" style='background: #ffffff; text-align: center; padding: 1.5rem; border-left: 4px solid #2c3e50;'>
+                <div style='font-size: 2rem; margin-bottom: 0.5rem; color: #2c3e50;'>💰</div>
+                <div style='font-size: 2rem; font-weight: 600; color: #2c3e50;'>{stats['sales_count']}</div>
+                <div style='font-size: 0.85rem; color: #7f8c8d; margin-top: 0.5rem;'>Verkäufe heute</div>
             </div>
         """, unsafe_allow_html=True)
     
     with col4:
         st.markdown(f"""
-            <div class="card" style='background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; text-align: center; padding: 1.5rem;'>
-                <div style='font-size: 2.5rem; margin-bottom: 0.5rem;'>💵</div>
-                <div style='font-size: 2rem; font-weight: 700;'>€{stats['sales_total']:.2f}</div>
-                <div style='font-size: 0.9rem; opacity: 0.9;'>Umsatz heute</div>
+            <div class="card" style='background: #ffffff; text-align: center; padding: 1.5rem; border-left: 4px solid #2c3e50;'>
+                <div style='font-size: 2rem; margin-bottom: 0.5rem; color: #2c3e50;'>💵</div>
+                <div style='font-size: 2rem; font-weight: 600; color: #2c3e50;'>€{stats['sales_total']:.2f}</div>
+                <div style='font-size: 0.85rem; color: #7f8c8d; margin-top: 0.5rem;'>Umsatz heute</div>
             </div>
         """, unsafe_allow_html=True)
     
@@ -380,11 +404,11 @@ if page == "📊 Dashboard":
             df_sales = pd.DataFrame(sales_data)
             fig = px.line(df_sales, x='sale_date', y='total', 
                          labels={'sale_date': 'Datum', 'total': 'Umsatz (€)'},
-                         color_discrete_sequence=['#667eea'])
+                         color_discrete_sequence=['#2c3e50'])
             fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font=dict(size=12),
+                plot_bgcolor='#ffffff',
+                paper_bgcolor='#ffffff',
+                font=dict(size=12, color='#2c3e50'),
                 height=400
             )
             st.plotly_chart(fig, use_container_width=True)
@@ -409,11 +433,11 @@ if page == "📊 Dashboard":
             fig = px.bar(df_services, x='name', y='count', 
                         labels={'name': 'Dienstleistung', 'count': 'Anzahl'},
                         color='count',
-                        color_continuous_scale='Viridis')
+                        color_continuous_scale='Greys')
             fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font=dict(size=12),
+                plot_bgcolor='#ffffff',
+                paper_bgcolor='#ffffff',
+                font=dict(size=12, color='#2c3e50'),
                 height=400
             )
             st.plotly_chart(fig, use_container_width=True)
@@ -436,7 +460,7 @@ if page == "📊 Dashboard":
 elif page == "👥 Kunden":
     st.markdown("""
         <div style='text-align: center; padding: 1rem 0; margin-bottom: 2rem;'>
-            <h1 style='font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>👥 Kundenverwaltung</h1>
+            <h1 style='font-size: 2.5rem; font-weight: 600; color: #2c3e50;'>👥 Kundenverwaltung</h1>
         </div>
     """, unsafe_allow_html=True)
     
@@ -526,8 +550,8 @@ elif page == "👥 Kunden":
 elif page == "📅 Termine":
     st.markdown("""
         <div style='text-align: center; padding: 1rem 0; margin-bottom: 2rem;'>
-            <h1 style='font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>📅 Terminbuchung</h1>
-            <p style='color: #666; font-size: 1.1rem;'>SimplyBook.me Style - Professionelle Terminverwaltung</p>
+            <h1 style='font-size: 2.5rem; font-weight: 600; color: #2c3e50;'>📅 Terminbuchung</h1>
+            <p style='color: #7f8c8d; font-size: 1rem;'>Professionelle Terminverwaltung</p>
         </div>
     """, unsafe_allow_html=True)
     
@@ -949,7 +973,7 @@ elif page == "📅 Termine":
 elif page == "💰 Kasse":
     st.markdown("""
         <div style='text-align: center; padding: 1rem 0; margin-bottom: 2rem;'>
-            <h1 style='font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>💰 Kassensystem</h1>
+            <h1 style='font-size: 2.5rem; font-weight: 600; color: #2c3e50;'>💰 Kassensystem</h1>
         </div>
     """, unsafe_allow_html=True)
     
@@ -1066,7 +1090,7 @@ elif page == "💰 Kasse":
 elif page == "💄 Produkte":
     st.markdown("""
         <div style='text-align: center; padding: 1rem 0; margin-bottom: 2rem;'>
-            <h1 style='font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>💄 Produktverwaltung</h1>
+            <h1 style='font-size: 2.5rem; font-weight: 600; color: #2c3e50;'>💄 Produktverwaltung</h1>
         </div>
     """, unsafe_allow_html=True)
     
@@ -1134,7 +1158,7 @@ elif page == "💄 Produkte":
 elif page == "🎁 Marketing":
     st.markdown("""
         <div style='text-align: center; padding: 1rem 0; margin-bottom: 2rem;'>
-            <h1 style='font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>🎁 Marketing & Gutscheine</h1>
+            <h1 style='font-size: 2.5rem; font-weight: 600; color: #2c3e50;'>🎁 Marketing & Gutscheine</h1>
         </div>
     """, unsafe_allow_html=True)
     
@@ -1191,7 +1215,7 @@ elif page == "🎁 Marketing":
 elif page == "📈 Analytics":
     st.markdown("""
         <div style='text-align: center; padding: 1rem 0; margin-bottom: 2rem;'>
-            <h1 style='font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>📈 Analytics & Reports</h1>
+            <h1 style='font-size: 2.5rem; font-weight: 600; color: #2c3e50;'>📈 Analytics & Reports</h1>
         </div>
     """, unsafe_allow_html=True)
     
@@ -1280,10 +1304,11 @@ elif page == "📈 Analytics":
 elif page == "🤖 AI Assistant":
     st.markdown("""
         <div style='text-align: center; padding: 1rem 0; margin-bottom: 2rem;'>
-            <h1 style='font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>🤖 AI Sales Assistant</h1>
-            <p style='color: #666; font-size: 1.1rem;'>Intelligente Unterstützung für Ihren Salon</p>
+            <h1 style='font-size: 2.5rem; font-weight: 600; color: #2c3e50;'>🤖 AI Sales Assistant</h1>
+            <p style='color: #7f8c8d; font-size: 1rem;'>Intelligente Unterstützung für Ihren Salon</p>
         </div>
     """, unsafe_allow_html=True)
+    
     
     from ai_assistant import (
         check_ollama_available, 
