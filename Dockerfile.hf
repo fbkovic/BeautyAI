@@ -34,20 +34,25 @@ echo "Starting Ollama..."\n\
 ollama serve &\n\
 OLLAMA_PID=$!\n\
 echo "Waiting for Ollama to start..."\n\
-sleep 10\n\
+sleep 15\n\
+echo "Testing Ollama connection..."\n\
+for i in {1..10}; do\n\
+    if curl -s http://localhost:11434/api/tags > /dev/null; then\n\
+        echo "Ollama is ready!"\n\
+        break\n\
+    fi\n\
+    echo "Waiting for Ollama... ($i/10)"\n\
+    sleep 2\n\
+done\n\
 echo "Checking for llama3.2 model..."\n\
 if ! ollama list | grep -q llama3.2; then\n\
     echo "Downloading llama3.2 model..."\n\
-    ollama pull llama3.2\n\
-    echo "Model downloaded successfully!"\n\
+    ollama pull llama3.2 || echo "Model download failed, will retry later"\n\
 else\n\
     echo "Model llama3.2 already exists"\n\
 fi\n\
-echo "Starting Nginx..."\n\
-nginx -g "daemon off;" &\n\
-NGINX_PID=$!\n\
-echo "Services started. Ollama PID: $OLLAMA_PID, Nginx PID: $NGINX_PID"\n\
-wait $OLLAMA_PID' > /start.sh && chmod +x /start.sh
+echo "Starting Nginx in foreground..."\n\
+exec nginx -g "daemon off;"' > /start.sh && chmod +x /start.sh
 
 # Start Ollama und Nginx
 CMD ["/bin/bash", "/start.sh"]
