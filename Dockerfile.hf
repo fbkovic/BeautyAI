@@ -27,7 +27,7 @@ RUN echo 'server { \
     } \
 }' > /etc/nginx/sites-available/default
 
-# Start Script - Startet Ollama und Nginx
+# Start Script - Startet Ollama, lädt Modell und startet Nginx
 RUN echo '#!/bin/bash\n\
 set -e\n\
 echo "Starting Ollama..."\n\
@@ -35,6 +35,14 @@ ollama serve &\n\
 OLLAMA_PID=$!\n\
 echo "Waiting for Ollama to start..."\n\
 sleep 10\n\
+echo "Checking for llama3.2 model..."\n\
+if ! ollama list | grep -q llama3.2; then\n\
+    echo "Downloading llama3.2 model..."\n\
+    ollama pull llama3.2\n\
+    echo "Model downloaded successfully!"\n\
+else\n\
+    echo "Model llama3.2 already exists"\n\
+fi\n\
 echo "Starting Nginx..."\n\
 nginx -g "daemon off;" &\n\
 NGINX_PID=$!\n\
