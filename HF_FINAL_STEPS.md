@@ -130,3 +130,4 @@ vercel --prod
 
 Der AI Assistant sollte jetzt vollständig funktionieren!
 
+

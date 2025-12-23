@@ -96,3 +96,4 @@ curl http://localhost:7860/api/tags
    - Railway.app (kostenloser Trial)
    - Lokal mit Ngrok/Tunnelmole
 
+
