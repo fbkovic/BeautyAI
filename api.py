@@ -14,6 +14,18 @@ import os
 from database import (
     init_database, execute_query, execute_update
 )
+from booking_system import (
+    get_available_time_slots, check_availability, create_online_booking,
+    get_upcoming_appointments, get_weekly_calendar, get_employee_schedule
+)
+from simplybook_features import (
+    create_recurring_appointments, create_group_booking,
+    send_appointment_reminder, get_appointments_needing_reminder
+)
+from ai_assistant import (
+    check_ollama_available, get_available_models, download_model,
+    chat_with_llm, get_crm_context
+)
 
 app = FastAPI(title="Beauty CRM API")
 
@@ -255,9 +267,240 @@ FRONTEND_HTML = """
             );
         }
         
+        // Terminbuchung Component (SimplyBook.me Stil)
+        function Booking() {
+            const [services, setServices] = useState([]);
+            const [employees, setEmployees] = useState([]);
+            const [selectedService, setSelectedService] = useState(null);
+            const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+            const [availableSlots, setAvailableSlots] = useState([]);
+            const [selectedSlot, setSelectedSlot] = useState(null);
+            const [customerData, setCustomerData] = useState({ first_name: '', last_name: '', email: '', phone: '' });
+            const [loading, setLoading] = useState(false);
+            const [message, setMessage] = useState(null);
+            
+            useEffect(() => {
+                fetch(`${API_URL}/api/services`).then(res => res.json()).then(data => setServices(data));
+                fetch(`${API_URL}/api/employees`).then(res => res.json()).then(data => setEmployees(data));
+            }, []);
+            
+            useEffect(() => {
+                if (selectedService && selectedDate) {
+                    fetch(`${API_URL}/api/booking/available-slots?date=${selectedDate}&service_id=${selectedService.id}`)
+                        .then(res => res.json())
+                        .then(data => setAvailableSlots(data))
+                        .catch(err => console.error(err));
+                }
+            }, [selectedService, selectedDate]);
+            
+            const handleBooking = async (e) => {
+                e.preventDefault();
+                if (!selectedService || !selectedSlot) {
+                    setMessage({ type: 'error', text: 'Bitte Service und Zeit auswählen' });
+                    return;
+                }
+                setLoading(true);
+                try {
+                    const response = await fetch(`${API_URL}/api/booking/book`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            ...customerData,
+                            service_id: selectedService.id,
+                            date: selectedDate,
+                            time: selectedSlot
+                        })
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        setMessage({ type: 'success', text: `✅ Termin erfolgreich gebucht! Buchungsnummer: #${result.id}` });
+                        setCustomerData({ first_name: '', last_name: '', email: '', phone: '' });
+                        setSelectedSlot(null);
+                    } else {
+                        setMessage({ type: 'error', text: result.detail || 'Fehler beim Buchen' });
+                    }
+                } catch (err) {
+                    setMessage({ type: 'error', text: 'Fehler beim Buchen' });
+                }
+                setLoading(false);
+            };
+            
+            return (
+                <div>
+                    <h2>📅 Terminbuchung</h2>
+                    {message && (
+                        <div className={message.type === 'success' ? 'success' : 'error'}>
+                            {message.text}
+                        </div>
+                    )}
+                    <div className="card">
+                        <h3>1. Service auswählen</h3>
+                        <select className="form-group" style={{width: '100%', padding: '0.5rem'}}
+                            onChange={(e) => setSelectedService(services.find(s => s.id == e.target.value))}>
+                            <option value="">-- Service wählen --</option>
+                            {services.map(s => (
+                                <option key={s.id} value={s.id}>
+                                    {s.name} - €{s.price.toFixed(2)} ({s.duration} Min)
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    
+                    {selectedService && (
+                        <>
+                            <div className="card">
+                                <h3>2. Datum wählen</h3>
+                                <input type="date" className="form-group" style={{width: '100%', padding: '0.5rem'}}
+                                    value={selectedDate} min={new Date().toISOString().split('T')[0]}
+                                    onChange={(e) => setSelectedDate(e.target.value)} />
+                            </div>
+                            
+                            {availableSlots.length > 0 && (
+                                <div className="card">
+                                    <h3>3. Uhrzeit wählen</h3>
+                                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.5rem'}}>
+                                        {availableSlots.slice(0, 12).map(slot => (
+                                            <button key={slot} className={`btn ${selectedSlot === slot ? 'btn-primary' : ''}`}
+                                                onClick={() => setSelectedSlot(slot)}>{slot}</button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {selectedSlot && (
+                                <div className="card">
+                                    <h3>4. Ihre Daten</h3>
+                                    <form onSubmit={handleBooking}>
+                                        <div className="form-group">
+                                            <label>Vorname *</label>
+                                            <input type="text" value={customerData.first_name}
+                                                onChange={(e) => setCustomerData({...customerData, first_name: e.target.value})} required />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Nachname *</label>
+                                            <input type="text" value={customerData.last_name}
+                                                onChange={(e) => setCustomerData({...customerData, last_name: e.target.value})} required />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>E-Mail *</label>
+                                            <input type="email" value={customerData.email}
+                                                onChange={(e) => setCustomerData({...customerData, email: e.target.value})} required />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Telefon</label>
+                                            <input type="tel" value={customerData.phone}
+                                                onChange={(e) => setCustomerData({...customerData, phone: e.target.value})} />
+                                        </div>
+                                        <button type="submit" className="btn btn-primary" disabled={loading}>
+                                            {loading ? 'Buche...' : '✅ Termin jetzt buchen'}
+                                        </button>
+                                    </form>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            );
+        }
+        
+        // AI Assistant Component
+        function AIAssistant() {
+            const [messages, setMessages] = useState([]);
+            const [input, setInput] = useState('');
+            const [ollamaStatus, setOllamaStatus] = useState(null);
+            const [models, setModels] = useState([]);
+            const [selectedModel, setSelectedModel] = useState('llama3.2');
+            const [loading, setLoading] = useState(false);
+            
+            useEffect(() => {
+                fetch(`${API_URL}/api/ai/status`)
+                    .then(res => res.json())
+                    .then(data => {
+                        setOllamaStatus(data);
+                        if (data.models.length > 0) {
+                            setModels(data.models);
+                            setSelectedModel(data.models[0]);
+                        }
+                    });
+            }, []);
+            
+            const sendMessage = async () => {
+                if (!input.trim() || loading) return;
+                const userMessage = input;
+                setInput('');
+                setMessages([...messages, { role: 'user', content: userMessage }]);
+                setLoading(true);
+                
+                try {
+                    const response = await fetch(`${API_URL}/api/ai/chat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: userMessage, model: selectedModel })
+                    });
+                    const result = await response.json();
+                    if (result.response) {
+                        setMessages(prev => [...prev, { role: 'assistant', content: result.response }]);
+                    } else if (result.error) {
+                        setMessages(prev => [...prev, { role: 'assistant', content: result.error }]);
+                    }
+                } catch (err) {
+                    setMessages(prev => [...prev, { role: 'assistant', content: 'Fehler beim Senden der Nachricht' }]);
+                }
+                setLoading(false);
+            };
+            
+            return (
+                <div>
+                    <h2>🤖 AI Assistant</h2>
+                    {ollamaStatus && (
+                        <div className={ollamaStatus.available ? 'success' : 'error'} style={{marginBottom: '1rem'}}>
+                            {ollamaStatus.available ? '✅ Ollama ist verfügbar' : '⚠️ Ollama ist nicht verfügbar'}
+                        </div>
+                    )}
+                    {models.length > 0 && (
+                        <div className="form-group">
+                            <label>Modell:</label>
+                            <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}>
+                                {models.map(m => <option key={m} value={m}>{m}</option>)}
+                            </select>
+                        </div>
+                    )}
+                    <div className="card" style={{height: '400px', overflowY: 'auto', marginBottom: '1rem'}}>
+                        {messages.length === 0 && (
+                            <div style={{color: '#b0b0b0', textAlign: 'center', padding: '2rem'}}>
+                                Stelle eine Frage zum CRM-System...
+                            </div>
+                        )}
+                        {messages.map((msg, idx) => (
+                            <div key={idx} style={{marginBottom: '1rem', padding: '0.5rem',
+                                background: msg.role === 'user' ? '#262730' : '#1e1e1e',
+                                borderRadius: '6px'}}>
+                                <strong>{msg.role === 'user' ? 'Sie' : 'AI'}:</strong> {msg.content}
+                            </div>
+                        ))}
+                        {loading && <div className="loading">AI denkt nach...</div>}
+                    </div>
+                    <div style={{display: 'flex', gap: '0.5rem'}}>
+                        <input type="text" className="form-group" style={{flex: 1, padding: '0.5rem'}}
+                            value={input} onChange={(e) => setInput(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                            placeholder="Frage stellen..." />
+                        <button className="btn btn-primary" onClick={sendMessage} disabled={loading || !ollamaStatus?.available}>
+                            Senden
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+        
         function App() {
             const [currentPage, setCurrentPage] = useState('dashboard');
-            const pages = { dashboard: { name: '📊 Dashboard', component: Dashboard }, customers: { name: '👥 Kunden', component: Customers } };
+            const pages = {
+                dashboard: { name: '📊 Dashboard', component: Dashboard },
+                customers: { name: '👥 Kunden', component: Customers },
+                booking: { name: '📅 Terminbuchung', component: Booking },
+                ai: { name: '🤖 AI Assistant', component: AIAssistant }
+            };
             const CurrentComponent = pages[currentPage]?.component || Dashboard;
             return (
                 <div>
@@ -438,6 +681,99 @@ async def get_revenue_stats(days: int = 7):
         GROUP BY sale_date
         ORDER BY sale_date
     """, (days,))
+
+# Terminbuchung (SimplyBook.me Stil)
+@app.get("/api/booking/available-slots")
+async def get_available_slots(date: str, employee_id: Optional[int] = None, service_id: int = None):
+    """Holt verfügbare Zeitfenster für ein Datum"""
+    ensure_db_initialized()
+    duration = 60
+    if service_id:
+        service = execute_query("SELECT duration FROM services WHERE id = ?", (service_id,))
+        if service:
+            duration = service[0]['duration'] or 60
+    return get_available_time_slots(date, employee_id, duration)
+
+@app.post("/api/booking/book")
+async def book_appointment(booking: dict):
+    """Erstellt eine Online-Buchung (SimplyBook.me Stil)"""
+    ensure_db_initialized()
+    try:
+        customer_data = {
+            'first_name': booking['first_name'],
+            'last_name': booking['last_name'],
+            'email': booking.get('email'),
+            'phone': booking.get('phone')
+        }
+        appointment_id = create_online_booking(
+            customer_data,
+            booking['service_id'],
+            booking['date'],
+            booking['time'],
+            booking.get('employee_id')
+        )
+        return {"id": appointment_id, "message": "Termin erfolgreich gebucht!"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/booking/upcoming")
+async def get_upcoming(days: int = 7):
+    """Holt kommende Termine"""
+    ensure_db_initialized()
+    return get_upcoming_appointments(days)
+
+@app.get("/api/booking/week")
+async def get_week_calendar(start_date: str):
+    """Holt Wochenkalender"""
+    ensure_db_initialized()
+    calendar_df = get_weekly_calendar(start_date)
+    return calendar_df.to_dict('records')
+
+# AI Assistant
+@app.get("/api/ai/status")
+async def ai_status():
+    """Prüft Ollama Status"""
+    return {
+        "available": check_ollama_available(),
+        "models": get_available_models() if check_ollama_available() else []
+    }
+
+@app.post("/api/ai/chat")
+async def ai_chat(request: dict):
+    """Chat mit AI Assistant"""
+    ensure_db_initialized()
+    if not check_ollama_available():
+        return {"error": "Ollama ist nicht verfügbar. Bitte Ollama installieren und starten."}
+    
+    model = request.get('model', 'llama3.2')
+    message = request.get('message', '')
+    context = get_crm_context()
+    
+    system_prompt = f"""Du bist ein hilfreicher AI-Assistant für ein Friseur- und Beauty-Salon CRM-System.
+Du hilfst bei Fragen zu:
+- Kundenverwaltung
+- Terminbuchung
+- Verkaufsempfehlungen
+- Produktempfehlungen
+- Marketing-Strategien
+- Salon-Management
+
+Aktuelle CRM-Daten:
+{context}
+
+Antworte immer freundlich, professionell und auf Deutsch."""
+    
+    full_prompt = f"{system_prompt}\n\nBenutzer: {message}\n\nAssistant:"
+    response = chat_with_llm(full_prompt, model)
+    
+    return {"response": response}
+
+@app.post("/api/ai/download-model")
+async def download_ai_model(request: dict):
+    """Lädt ein Ollama-Modell herunter"""
+    model_name = request.get('model', 'llama3.2')
+    success = download_model(model_name)
+    return {"success": success, "model": model_name}
 
 # Export für Vercel
 __all__ = ['app']
