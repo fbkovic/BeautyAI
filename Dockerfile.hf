@@ -1,0 +1,43 @@
+# Dockerfile für Hugging Face Spaces
+# Port 7860 wird von Hugging Face Spaces verwendet
+
+FROM ollama/ollama:latest
+
+# Expose Port 7860 (Hugging Face Spaces Standard)
+EXPOSE 7860
+
+# Installiere nginx und curl
+RUN apt-get update && apt-get install -y nginx curl && rm -rf /var/lib/apt/lists/*
+
+# Nginx Konfiguration für Reverse Proxy
+RUN echo 'server { \
+    listen 7860; \
+    server_name _; \
+    location / { \
+        proxy_pass http://localhost:11434; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
+        proxy_set_header X-Forwarded-Proto $scheme; \
+        proxy_read_timeout 300s; \
+        proxy_connect_timeout 75s; \
+    } \
+}' > /etc/nginx/sites-available/default
+
+# Start Script - Startet Ollama und Nginx
+RUN echo '#!/bin/bash\n\
+set -e\n\
+echo "Starting Ollama..."\n\
+ollama serve &\n\
+OLLAMA_PID=$!\n\
+echo "Waiting for Ollama to start..."\n\
+sleep 10\n\
+echo "Starting Nginx..."\n\
+nginx -g "daemon off;" &\n\
+NGINX_PID=$!\n\
+echo "Services started. Ollama PID: $OLLAMA_PID, Nginx PID: $NGINX_PID"\n\
+wait $OLLAMA_PID' > /start.sh && chmod +x /start.sh
+
+# Start Ollama und Nginx
+CMD ["/start.sh"]
+
