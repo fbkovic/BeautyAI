@@ -1,18 +1,18 @@
 """
 FastAPI Backend für Beauty CRM
 API-Endpunkte für das CRM-System
+Optimiert für Vercel Serverless Functions
 """
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import Optional, List, Dict
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 
 from database import (
-    init_database, execute_query, execute_update, get_connection
+    init_database, execute_query, execute_update
 )
 
 app = FastAPI(title="Beauty CRM API")
@@ -26,8 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialisiere Datenbank beim Start (für Vercel)
-# Vercel führt Startup-Events nicht zuverlässig aus, daher initialisieren wir bei Bedarf
+# Initialisiere Datenbank bei Bedarf (für Vercel Serverless)
 _db_initialized = False
 
 def ensure_db_initialized():
@@ -37,13 +36,8 @@ def ensure_db_initialized():
             init_database()
             _db_initialized = True
         except Exception as e:
-            print(f"Database initialization error: {e}")
-            # Bei Fehler trotzdem fortfahren (DB könnte bereits existieren)
+            print(f"Database initialization: {e}")
             _db_initialized = True
-
-# Serve static files
-if os.path.exists("public"):
-    app.mount("/static", StaticFiles(directory="public"), name="static")
 
 # Pydantic Models
 class CustomerCreate(BaseModel):
@@ -54,14 +48,6 @@ class CustomerCreate(BaseModel):
     address: Optional[str] = None
     birthdate: Optional[str] = None
     notes: Optional[str] = None
-
-class ServiceCreate(BaseModel):
-    name: str
-    category: Optional[str] = None
-    duration: Optional[int] = None
-    price: float
-    description: Optional[str] = None
-    active: bool = True
 
 class AppointmentCreate(BaseModel):
     customer_id: int
@@ -78,55 +64,243 @@ class SaleCreate(BaseModel):
     payment_method: str
     discount: float = 0.0
 
-# API Routes
+# Frontend HTML
+FRONTEND_HTML = """
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon CRM Beauty</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0e1117; color: #fafafa; min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .header { text-align: center; padding: 2rem 0; border-bottom: 1px solid #333; margin-bottom: 2rem; }
+        .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .sidebar {
+            position: fixed; left: 0; top: 0; width: 250px; height: 100vh;
+            background: #1e1e1e; border-right: 1px solid #333; padding: 2rem 1rem; overflow-y: auto;
+        }
+        .sidebar h2 { text-align: center; margin-bottom: 2rem; font-size: 1.3rem; }
+        .nav-item {
+            padding: 1rem; margin: 0.5rem 0; background: #262730; border-radius: 6px;
+            cursor: pointer; transition: all 0.2s; border: 1px solid #3a3a4a;
+        }
+        .nav-item:hover { background: #3a3a4a; }
+        .nav-item.active { background: #ff4b4b; border-color: #ff4b4b; }
+        .main-content { margin-left: 250px; padding: 2rem; }
+        .card {
+            background: #1e1e1e; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; border: 1px solid #333;
+        }
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: #fff; color: #2c3e50; text-align: center; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #2c3e50;
+        }
+        .stat-card .value { font-size: 2rem; font-weight: 600; margin: 0.5rem 0; }
+        .stat-card .label { font-size: 0.85rem; color: #7f8c8d; }
+        .btn {
+            background: #262730; color: #fafafa; border: 1px solid #3a3a4a; border-radius: 6px;
+            padding: 0.5rem 1.5rem; cursor: pointer; font-weight: 500; transition: all 0.2s;
+        }
+        .btn:hover { background: #3a3a4a; }
+        .btn-primary { background: #ff4b4b; border-color: #ff4b4b; }
+        .btn-primary:hover { background: #ff6b6b; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: #fafafa; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #d0d0d0;
+            background: #fff; color: #2c3e50; font-size: 1rem;
+        }
+        .table {
+            width: 100%; border-collapse: collapse; background: #1e1e1e; border-radius: 6px; overflow: hidden;
+        }
+        .table th, .table td { padding: 1rem; text-align: left; border-bottom: 1px solid #333; }
+        .table th { background: #262730; font-weight: 600; }
+        .loading { text-align: center; padding: 2rem; color: #b0b0b0; }
+        .error { background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 6px; margin: 1rem 0; }
+        .success { background: #d4edda; color: #155724; padding: 1rem; border-radius: 6px; margin: 1rem 0; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const API_URL = window.location.origin;
+        
+        function Dashboard() {
+            const [stats, setStats] = useState(null);
+            const [loading, setLoading] = useState(true);
+            useEffect(() => {
+                fetch(`${API_URL}/api/stats/today`)
+                    .then(res => res.json())
+                    .then(data => { setStats(data); setLoading(false); })
+                    .catch(err => { console.error(err); setLoading(false); });
+            }, []);
+            if (loading) return <div className="loading">Lade Statistiken...</div>;
+            if (!stats) return <div className="error">Fehler beim Laden</div>;
+            return (
+                <div>
+                    <h2>📊 Dashboard</h2>
+                    <div className="stats-grid">
+                        <div className="stat-card">
+                            <div>📅</div>
+                            <div className="value">{stats.appointments}</div>
+                            <div className="label">Heutige Termine</div>
+                        </div>
+                        <div className="stat-card">
+                            <div>✅</div>
+                            <div className="value">{stats.open_appointments}</div>
+                            <div className="label">Offene Termine</div>
+                        </div>
+                        <div className="stat-card">
+                            <div>💰</div>
+                            <div className="value">{stats.sales_count}</div>
+                            <div className="label">Verkäufe heute</div>
+                        </div>
+                        <div className="stat-card">
+                            <div>💵</div>
+                            <div className="value">€{stats.sales_total.toFixed(2)}</div>
+                            <div className="label">Umsatz heute</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        function Customers() {
+            const [customers, setCustomers] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [showForm, setShowForm] = useState(false);
+            const [formData, setFormData] = useState({ first_name: '', last_name: '', email: '', phone: '' });
+            useEffect(() => {
+                fetch(`${API_URL}/api/customers`)
+                    .then(res => res.json())
+                    .then(data => { setCustomers(data); setLoading(false); })
+                    .catch(err => { console.error(err); setLoading(false); });
+            }, []);
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                try {
+                    const response = await fetch(`${API_URL}/api/customers`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                    if (response.ok) {
+                        setShowForm(false);
+                        setFormData({ first_name: '', last_name: '', email: '', phone: '' });
+                        fetch(`${API_URL}/api/customers`).then(res => res.json()).then(data => setCustomers(data));
+                    }
+                } catch (err) { console.error(err); }
+            };
+            if (loading) return <div className="loading">Lade Kunden...</div>;
+            return (
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        <h2>👥 Kunden</h2>
+                        <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
+                            {showForm ? 'Abbrechen' : '+ Neuer Kunde'}
+                        </button>
+                    </div>
+                    {showForm && (
+                        <div className="card">
+                            <h3>Neuer Kunde</h3>
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <label>Vorname *</label>
+                                    <input type="text" value={formData.first_name}
+                                        onChange={(e) => setFormData({...formData, first_name: e.target.value})} required />
+                                </div>
+                                <div className="form-group">
+                                    <label>Nachname *</label>
+                                    <input type="text" value={formData.last_name}
+                                        onChange={(e) => setFormData({...formData, last_name: e.target.value})} required />
+                                </div>
+                                <div className="form-group">
+                                    <label>E-Mail</label>
+                                    <input type="email" value={formData.email}
+                                        onChange={(e) => setFormData({...formData, email: e.target.value})} />
+                                </div>
+                                <button type="submit" className="btn btn-primary">Speichern</button>
+                            </form>
+                        </div>
+                    )}
+                    <div className="card">
+                        <table className="table">
+                            <thead>
+                                <tr><th>Name</th><th>E-Mail</th><th>Telefon</th><th>Treuepunkte</th></tr>
+                            </thead>
+                            <tbody>
+                                {customers.map(customer => (
+                                    <tr key={customer.id}>
+                                        <td>{customer.first_name} {customer.last_name}</td>
+                                        <td>{customer.email || '-'}</td>
+                                        <td>{customer.phone || '-'}</td>
+                                        <td>{customer.loyalty_points || 0}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        }
+        
+        function App() {
+            const [currentPage, setCurrentPage] = useState('dashboard');
+            const pages = { dashboard: { name: '📊 Dashboard', component: Dashboard }, customers: { name: '👥 Kunden', component: Customers } };
+            const CurrentComponent = pages[currentPage]?.component || Dashboard;
+            return (
+                <div>
+                    <div className="sidebar">
+                        <h2>💇‍♀️ Salon CRM</h2>
+                        {Object.entries(pages).map(([key, page]) => (
+                            <div key={key} className={`nav-item ${currentPage === key ? 'active' : ''}`}
+                                onClick={() => setCurrentPage(key)}>{page.name}</div>
+                        ))}
+                    </div>
+                    <div className="main-content">
+                        <div className="container"><CurrentComponent /></div>
+                    </div>
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
+"""
 
+# API Routes
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """Serve Frontend"""
-    try:
-        # Versuche verschiedene Pfade
-        paths = [
-            "public/index.html",
-            "index.html",
-            os.path.join(os.path.dirname(__file__), "public", "index.html"),
-            os.path.join(os.path.dirname(__file__), "index.html")
-        ]
-        
-        for path in paths:
-            if os.path.exists(path):
-                with open(path, "r", encoding="utf-8") as f:
-                    return HTMLResponse(content=f.read())
-        
-        # Fallback HTML
-        return HTMLResponse(content="""
-        <!DOCTYPE html>
-        <html>
-        <head><title>Beauty CRM</title></head>
-        <body>
-            <h1>Beauty CRM API</h1>
-            <p>Frontend wird geladen...</p>
-            <p><a href="/api/health">API Health Check</a></p>
-        </body>
-        </html>
-        """)
-    except Exception as e:
-        return HTMLResponse(content=f"<h1>Error</h1><p>{str(e)}</p>")
+    ensure_db_initialized()
+    return HTMLResponse(content=FRONTEND_HTML)
 
 @app.get("/api/health")
 async def health():
     ensure_db_initialized()
-    return {"status": "ok", "database": "initialized"}
+    return {"status": "ok", "database": "ready"}
 
-# Customers
 @app.get("/api/customers")
 async def get_customers():
-    """Holt alle Kunden"""
     ensure_db_initialized()
     return execute_query("SELECT * FROM customers ORDER BY last_name, first_name")
 
 @app.get("/api/customers/{customer_id}")
 async def get_customer(customer_id: int):
-    """Holt einen Kunden"""
+    ensure_db_initialized()
     result = execute_query("SELECT * FROM customers WHERE id = ?", (customer_id,))
     if not result:
         raise HTTPException(status_code=404, detail="Kunde nicht gefunden")
@@ -134,7 +308,7 @@ async def get_customer(customer_id: int):
 
 @app.post("/api/customers")
 async def create_customer(customer: CustomerCreate):
-    """Erstellt einen neuen Kunden"""
+    ensure_db_initialized()
     customer_id = execute_update("""
         INSERT INTO customers (first_name, last_name, email, phone, address, birthdate, notes)
         VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -142,38 +316,14 @@ async def create_customer(customer: CustomerCreate):
           customer.address, customer.birthdate, customer.notes))
     return {"id": customer_id, "message": "Kunde erfolgreich erstellt"}
 
-@app.put("/api/customers/{customer_id}")
-async def update_customer(customer_id: int, customer: CustomerCreate):
-    """Aktualisiert einen Kunden"""
-    execute_update("""
-        UPDATE customers 
-        SET first_name = ?, last_name = ?, email = ?, phone = ?, 
-            address = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-    """, (customer.first_name, customer.last_name, customer.email, customer.phone,
-          customer.address, customer.notes, customer_id))
-    return {"message": "Kunde aktualisiert"}
-
-# Services
 @app.get("/api/services")
 async def get_services():
-    """Holt alle Dienstleistungen"""
+    ensure_db_initialized()
     return execute_query("SELECT * FROM services WHERE active = 1 ORDER BY category, name")
 
-@app.post("/api/services")
-async def create_service(service: ServiceCreate):
-    """Erstellt eine neue Dienstleistung"""
-    service_id = execute_update("""
-        INSERT INTO services (name, category, duration, price, description, active)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (service.name, service.category, service.duration, service.price,
-          service.description, 1 if service.active else 0))
-    return {"id": service_id, "message": "Dienstleistung erfolgreich erstellt"}
-
-# Appointments
 @app.get("/api/appointments")
 async def get_appointments(date: Optional[str] = None):
-    """Holt Termine"""
+    ensure_db_initialized()
     if date:
         return execute_query("""
             SELECT a.*, c.first_name || ' ' || c.last_name as customer_name, 
@@ -199,7 +349,7 @@ async def get_appointments(date: Optional[str] = None):
 
 @app.post("/api/appointments")
 async def create_appointment(appointment: AppointmentCreate):
-    """Erstellt einen neuen Termin"""
+    ensure_db_initialized()
     appointment_id = execute_update("""
         INSERT INTO appointments (customer_id, service_id, employee_id, 
                                   appointment_date, appointment_time, duration, notes, status, group_size)
@@ -210,16 +360,9 @@ async def create_appointment(appointment: AppointmentCreate):
           appointment.service_id, appointment.notes, appointment.group_size))
     return {"id": appointment_id, "message": "Termin erfolgreich gebucht"}
 
-@app.put("/api/appointments/{appointment_id}")
-async def update_appointment_status(appointment_id: int, status: str):
-    """Aktualisiert den Status eines Termins"""
-    execute_update("UPDATE appointments SET status = ? WHERE id = ?", (status, appointment_id))
-    return {"message": "Status aktualisiert"}
-
-# Sales
 @app.get("/api/sales")
 async def get_sales(days: int = 30):
-    """Holt Verkäufe"""
+    ensure_db_initialized()
     return execute_query("""
         SELECT s.*, c.first_name || ' ' || c.last_name as customer_name
         FROM sales s
@@ -230,17 +373,16 @@ async def get_sales(days: int = 30):
 
 @app.post("/api/sales")
 async def create_sale(sale: SaleCreate):
-    """Erstellt einen neuen Verkauf"""
+    ensure_db_initialized()
     now = datetime.now()
+    total = sum(item['price'] * item['quantity'] for item in sale.items)
     sale_id = execute_update("""
         INSERT INTO sales (customer_id, sale_date, sale_time, total_amount, 
                           payment_method, discount)
         VALUES (?, ?, ?, ?, ?, ?)
     """, (sale.customer_id, now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S"),
-          sum(item['price'] * item['quantity'] for item in sale.items),
-          sale.payment_method, sale.discount))
+          total, sale.payment_method, sale.discount))
     
-    # Verkaufsdetails speichern
     for item in sale.items:
         execute_update("""
             INSERT INTO sale_items (sale_id, item_type, item_id, item_name, quantity, price)
@@ -249,33 +391,19 @@ async def create_sale(sale: SaleCreate):
     
     return {"id": sale_id, "message": "Verkauf erfolgreich"}
 
-# Products
 @app.get("/api/products")
 async def get_products():
-    """Holt alle Produkte"""
+    ensure_db_initialized()
     return execute_query("SELECT * FROM products ORDER BY category, name")
 
-@app.post("/api/products")
-async def create_product(product: dict):
-    """Erstellt ein neues Produkt"""
-    product_id = execute_update("""
-        INSERT INTO products (name, category, brand, price, stock_quantity, min_stock_level, description)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (product['name'], product.get('category'), product.get('brand'),
-          product['price'], product.get('stock_quantity', 0),
-          product.get('min_stock_level', 5), product.get('description')))
-    return {"id": product_id, "message": "Produkt erfolgreich erstellt"}
-
-# Employees
 @app.get("/api/employees")
 async def get_employees():
-    """Holt alle Mitarbeiter"""
+    ensure_db_initialized()
     return execute_query("SELECT * FROM employees WHERE active = 1 ORDER BY last_name, first_name")
 
-# Statistics
 @app.get("/api/stats/today")
 async def get_today_stats():
-    """Holt Statistiken für heute"""
+    ensure_db_initialized()
     today = datetime.now().strftime("%Y-%m-%d")
     
     appointments = execute_query("""
@@ -302,7 +430,7 @@ async def get_today_stats():
 
 @app.get("/api/stats/revenue")
 async def get_revenue_stats(days: int = 7):
-    """Holt Umsatzstatistiken"""
+    ensure_db_initialized()
     return execute_query("""
         SELECT sale_date, SUM(total_amount - discount) as total
         FROM sales
@@ -310,7 +438,6 @@ async def get_revenue_stats(days: int = 7):
         GROUP BY sale_date
         ORDER BY sale_date
     """, (days,))
-
 
 # Export für Vercel
 __all__ = ['app']
