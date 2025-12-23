@@ -1,6 +1,6 @@
 """
 AI Assistant für das CRM-System
-Verwendet Ollama für lokale LLM-Inferenz
+Unterstützt Ollama (lokal/Cloud) und Cloud-LLM-APIs als Fallback
 """
 import requests
 import json
@@ -12,6 +12,11 @@ import os
 # Für lokale Entwicklung: http://localhost:11434
 # Für Cloud: https://your-ollama-server.com
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+
+# Cloud LLM APIs als Fallback
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+USE_CLOUD_API = os.getenv("USE_CLOUD_API", "false").lower() == "true"
 
 def check_ollama_available() -> bool:
     """Prüft ob Ollama läuft"""
