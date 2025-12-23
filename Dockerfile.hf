@@ -38,6 +38,6 @@ NGINX_PID=$!\n\
 echo "Services started. Ollama PID: $OLLAMA_PID, Nginx PID: $NGINX_PID"\n\
 wait $OLLAMA_PID' > /start.sh && chmod +x /start.sh
 
-# Start Ollama und Nginx
-CMD ["/start.sh"]
+# Start Ollama und Nginx - WICHTIG: bash explizit aufrufen
+CMD ["/bin/bash", "/start.sh"]
 
