@@ -3,6 +3,9 @@
 
 FROM ollama/ollama:latest
 
+# Überschreibe Entrypoint - Ollama hat ein spezielles Entrypoint das alle CMDs als Befehle interpretiert
+ENTRYPOINT []
+
 # Expose Port 7860 (Hugging Face Spaces Standard)
 EXPOSE 7860
 
@@ -38,6 +41,6 @@ NGINX_PID=$!\n\
 echo "Services started. Ollama PID: $OLLAMA_PID, Nginx PID: $NGINX_PID"\n\
 wait $OLLAMA_PID' > /start.sh && chmod +x /start.sh
 
-# Start Ollama und Nginx - WICHTIG: bash explizit aufrufen
+# Start Ollama und Nginx
 CMD ["/bin/bash", "/start.sh"]
 
