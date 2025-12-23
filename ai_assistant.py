@@ -52,36 +52,104 @@ def download_model(model_name: str = "llama3.2") -> bool:
         print(f"Fehler beim Download: {e}")
     return False
 
-def chat_with_llm(prompt: str, model: str = "llama3.2", context: Optional[str] = None) -> str:
-    """Sendet eine Nachricht an die LLM und erhält eine Antwort"""
-    if not check_ollama_available():
-        return "❌ Ollama ist nicht verfügbar. Bitte stelle sicher, dass Ollama installiert und gestartet ist."
+def chat_with_openai(prompt: str, model: str = "gpt-3.5-turbo") -> Optional[str]:
+    """Verwendet OpenAI API als Fallback"""
+    if not OPENAI_API_KEY:
+        return None
     
+    try:
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 500
+            },
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data['choices'][0]['message']['content']
+    except Exception as e:
+        print(f"OpenAI Error: {e}")
+    return None
+
+def chat_with_anthropic(prompt: str, model: str = "claude-3-haiku-20240307") -> Optional[str]:
+    """Verwendet Anthropic Claude API als Fallback"""
+    if not ANTHROPIC_API_KEY:
+        return None
+    
+    try:
+        response = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": ANTHROPIC_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": model,
+                "max_tokens": 500,
+                "messages": [{"role": "user", "content": prompt}]
+            },
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data['content'][0]['text']
+    except Exception as e:
+        print(f"Anthropic Error: {e}")
+    return None
+
+def chat_with_llm(prompt: str, model: str = "llama3.2", context: Optional[str] = None) -> str:
+    """Sendet eine Nachricht an die LLM und erhält eine Antwort
+    Versucht zuerst Ollama, dann Cloud-APIs als Fallback
+    """
     # Erweitere den Prompt mit Kontext, falls vorhanden
     full_prompt = prompt
     if context:
         full_prompt = f"Kontext: {context}\n\nFrage: {prompt}"
     
-    try:
-        response = requests.post(
-            f"{OLLAMA_BASE_URL}/api/generate",
-            json={
-                "model": model,
-                "prompt": full_prompt,
-                "stream": False
-            },
-            timeout=60
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            return data.get('response', 'Keine Antwort erhalten')
-        else:
-            return f"❌ Fehler: Status Code {response.status_code}"
-    except requests.exceptions.Timeout:
-        return "❌ Timeout: Die Anfrage dauerte zu lange."
-    except Exception as e:
-        return f"❌ Fehler: {str(e)}"
+    # Versuche zuerst Ollama
+    if not USE_CLOUD_API and check_ollama_available():
+        try:
+            response = requests.post(
+                f"{OLLAMA_BASE_URL}/api/generate",
+                json={
+                    "model": model,
+                    "prompt": full_prompt,
+                    "stream": False
+                },
+                timeout=60
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('response', 'Keine Antwort erhalten')
+        except requests.exceptions.Timeout:
+            pass  # Fallback zu Cloud API
+        except Exception as e:
+            print(f"Ollama Error: {e}")
+    
+    # Fallback zu Cloud APIs
+    if OPENAI_API_KEY:
+        result = chat_with_openai(full_prompt)
+        if result:
+            return result
+    
+    if ANTHROPIC_API_KEY:
+        result = chat_with_anthropic(full_prompt)
+        if result:
+            return result
+    
+    # Keine API verfügbar
+    return "❌ Keine AI-API verfügbar. Bitte Ollama installieren oder eine Cloud-API konfigurieren (OpenAI/Anthropic)."
 
 def get_crm_context() -> str:
     """Holt relevante CRM-Daten als Kontext für den AI Assistant"""
@@ -122,4 +190,3 @@ def get_crm_context() -> str:
         context_parts.append(f"Produkte mit niedrigem Bestand: {products}")
     
     return "\n".join(context_parts)
-
