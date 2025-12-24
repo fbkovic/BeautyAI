@@ -21,7 +21,8 @@ USE_CLOUD_API = os.getenv("USE_CLOUD_API", "false").lower() == "true"
 def check_ollama_available() -> bool:
     """Prüft ob Ollama läuft"""
     try:
-        response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=2)
+        # Erhöhter Timeout für Hugging Face Spaces
+        response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=10)
         return response.status_code == 200
     except:
         return False
@@ -29,7 +30,8 @@ def check_ollama_available() -> bool:
 def get_available_models() -> List[str]:
     """Holt verfügbare Ollama-Modelle"""
     try:
-        response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=5)
+        # Erhöhter Timeout für Hugging Face Spaces
+        response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=15)
         if response.status_code == 200:
             data = response.json()
             return [model['name'] for model in data.get('models', [])]
@@ -119,6 +121,7 @@ def chat_with_llm(prompt: str, model: str = "llama3.2", context: Optional[str] =
     # Versuche zuerst Ollama
     if not USE_CLOUD_API and check_ollama_available():
         try:
+            # Erhöhter Timeout für Hugging Face Spaces (kann bei Cold Start länger dauern)
             response = requests.post(
                 f"{OLLAMA_BASE_URL}/api/generate",
                 json={
@@ -126,7 +129,7 @@ def chat_with_llm(prompt: str, model: str = "llama3.2", context: Optional[str] =
                     "prompt": full_prompt,
                     "stream": False
                 },
-                timeout=60
+                timeout=120  # 2 Minuten für Hugging Face Spaces
             )
             
             if response.status_code == 200:
