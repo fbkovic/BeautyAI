@@ -545,19 +545,19 @@ FRONTEND_HTML = """
                     height: 'calc(100vh - 200px)',
                     maxWidth: '768px',
                     margin: '0 auto',
-                    background: '#ffffff'
+                    background: '#1e1e1e'
                 }}>
                     {/* Header */}
                     <div style={{
                         textAlign: 'center',
                         padding: '1.5rem',
-                        borderBottom: '1px solid #e5e5e5',
-                        background: '#ffffff',
+                        borderBottom: '1px solid #333333',
+                        background: '#1e1e1e',
                         position: 'sticky',
                         top: 0,
                         zIndex: 100
                     }}>
-                        <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#2c3e50', margin: 0 }}>
+                        <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#fafafa', margin: 0 }}>
                             💇‍♀️ AI Sales Assistant
                         </h1>
                         {models.length > 0 && (
@@ -568,7 +568,9 @@ FRONTEND_HTML = """
                                     marginTop: '0.5rem',
                                     padding: '0.25rem 0.5rem',
                                     borderRadius: '4px',
-                                    border: '1px solid #d1d5db',
+                                    border: '1px solid #3a3a4a',
+                                    background: '#262730',
+                                    color: '#fafafa',
                                     fontSize: '0.875rem'
                                 }}
                             >
@@ -582,14 +584,14 @@ FRONTEND_HTML = """
                         flex: 1,
                         overflowY: 'auto',
                         padding: '1.5rem 0',
-                        background: '#ffffff'
+                        background: '#1e1e1e'
                     }}>
                         {messages.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#6b7280' }}>
-                                <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#2c3e50', marginBottom: '0.5rem' }}>
+                            <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#b0b0b0' }}>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#fafafa', marginBottom: '0.5rem' }}>
                                     Wie kann ich Ihnen helfen?
                                 </h2>
-                                <p>Stellen Sie Fragen zu Ihrem Salon-CRM:</p>
+                                <p style={{ color: '#b0b0b0' }}>Stellen Sie Fragen zu Ihrem Salon-CRM:</p>
                                 <div style={{ 
                                     display: 'grid', 
                                     gridTemplateColumns: 'repeat(2, 1fr)', 
@@ -607,22 +609,22 @@ FRONTEND_HTML = """
                                             }}
                                             style={{
                                                 padding: '0.75rem 1rem',
-                                                background: '#ffffff',
-                                                border: '1px solid #e5e5e5',
+                                                background: '#262730',
+                                                border: '1px solid #3a3a4a',
                                                 borderRadius: '8px',
                                                 cursor: 'pointer',
                                                 textAlign: 'left',
                                                 fontSize: '0.875rem',
-                                                color: '#374151',
+                                                color: '#fafafa',
                                                 transition: 'all 0.2s'
                                             }}
                                             onMouseOver={(e) => {
-                                                e.target.style.background = '#f7f7f8';
-                                                e.target.style.borderColor = '#d1d5db';
+                                                e.target.style.background = '#3a3a4a';
+                                                e.target.style.borderColor = '#4a4a5a';
                                             }}
                                             onMouseOut={(e) => {
-                                                e.target.style.background = '#ffffff';
-                                                e.target.style.borderColor = '#e5e5e5';
+                                                e.target.style.background = '#262730';
+                                                e.target.style.borderColor = '#3a3a4a';
                                             }}
                                         >
                                             💬 {q}
@@ -636,7 +638,7 @@ FRONTEND_HTML = """
                                     display: 'flex',
                                     gap: '1rem',
                                     padding: '1.5rem 1rem',
-                                    background: msg.role === 'user' ? '#ffffff' : '#f7f7f8',
+                                    background: msg.role === 'user' ? '#262730' : '#1e1e1e',
                                     animation: 'fadeIn 0.3s ease-in'
                                 }}>
                                     <div style={{
@@ -657,7 +659,7 @@ FRONTEND_HTML = """
                                         flex: 1,
                                         paddingTop: '0.25rem',
                                         lineHeight: 1.75,
-                                        color: '#374151',
+                                        color: '#fafafa',
                                         fontSize: '0.95rem',
                                         whiteSpace: 'pre-wrap'
                                     }}>
@@ -671,7 +673,7 @@ FRONTEND_HTML = """
                                 display: 'flex',
                                 gap: '1rem',
                                 padding: '1.5rem 1rem',
-                                background: '#f7f7f8'
+                                background: '#1e1e1e'
                             }}>
                                 <div style={{
                                     width: '32px',
@@ -687,7 +689,7 @@ FRONTEND_HTML = """
                                 }}>
                                     🤖
                                 </div>
-                                <div style={{ flex: 1, paddingTop: '0.25rem', color: '#6b7280' }}>
+                                <div style={{ flex: 1, paddingTop: '0.25rem', color: '#b0b0b0' }}>
                                     Denke nach...
                                 </div>
                             </div>
@@ -697,8 +699,8 @@ FRONTEND_HTML = """
                     {/* Input */}
                     <div style={{
                         padding: '1rem',
-                        borderTop: '1px solid #e5e5e5',
-                        background: '#ffffff'
+                        borderTop: '1px solid #333333',
+                        background: '#1e1e1e'
                     }}>
                         <div style={{
                             display: 'flex',
@@ -717,17 +719,19 @@ FRONTEND_HTML = """
                                     flex: 1,
                                     padding: '0.75rem 1rem',
                                     borderRadius: '24px',
-                                    border: '1px solid #d1d5db',
+                                    border: '1px solid #3a3a4a',
+                                    background: '#262730',
+                                    color: '#fafafa',
                                     fontSize: '0.95rem',
                                     outline: 'none',
                                     transition: 'all 0.2s'
                                 }}
                                 onFocus={(e) => {
                                     e.target.style.borderColor = '#10a37f';
-                                    e.target.style.boxShadow = '0 0 0 3px rgba(16, 163, 127, 0.1)';
+                                    e.target.style.boxShadow = '0 0 0 3px rgba(16, 163, 127, 0.2)';
                                 }}
                                 onBlur={(e) => {
-                                    e.target.style.borderColor = '#d1d5db';
+                                    e.target.style.borderColor = '#3a3a4a';
                                     e.target.style.boxShadow = 'none';
                                 }}
                             />
@@ -736,7 +740,7 @@ FRONTEND_HTML = """
                                 disabled={loading || !input.trim() || !ollamaAvailable}
                                 style={{
                                     padding: '0.75rem 1.5rem',
-                                    background: ollamaAvailable && input.trim() ? '#10a37f' : '#d1d5db',
+                                    background: ollamaAvailable && input.trim() ? '#10a37f' : '#3a3a4a',
                                     color: 'white',
                                     border: 'none',
                                     borderRadius: '24px',
@@ -749,8 +753,8 @@ FRONTEND_HTML = """
                             </button>
                         </div>
                         {!ollamaAvailable && (
-                            <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#dc2626', textAlign: 'center' }}>
-                                ⚠️ Ollama ist nicht verfügbar. Bitte Ollama installieren und starten.
+                            <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#ff6b6b', textAlign: 'center' }}>
+                                ⚠️ Ollama ist nicht verfügbar. Prüfe die Verbindung zu Hugging Face Spaces.
                             </p>
                         )}
                     </div>
@@ -1037,8 +1041,14 @@ async def ai_status():
 async def ai_chat(request: dict):
     """Chat mit AI Assistant"""
     ensure_db_initialized()
-    if not check_ollama_available():
-        return {"error": "Ollama ist nicht verfügbar. Bitte Ollama installieren und starten."}
+    from ai_assistant import OLLAMA_BASE_URL
+    
+    # Prüfe Ollama Status mit detaillierter Fehlermeldung
+    available = check_ollama_available()
+    if not available:
+        return {
+            "error": f"Ollama ist nicht verfügbar. URL: {OLLAMA_BASE_URL}. Bitte prüfen Sie die Verbindung zu Hugging Face Spaces."
+        }
     
     model = request.get('model', 'llama3.2')
     message = request.get('message', '')
@@ -1059,9 +1069,12 @@ Aktuelle CRM-Daten:
 Antworte immer freundlich, professionell und auf Deutsch."""
     
     full_prompt = f"{system_prompt}\n\nBenutzer: {message}\n\nAssistant:"
-    response = chat_with_llm(full_prompt, model)
     
-    return {"response": response}
+    try:
+        response = chat_with_llm(full_prompt, model)
+        return {"response": response}
+    except Exception as e:
+        return {"error": f"Fehler beim Generieren der Antwort: {str(e)}"}
 
 @app.post("/api/ai/download-model")
 async def download_ai_model(request: dict):
