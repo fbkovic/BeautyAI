@@ -23,8 +23,19 @@ def check_ollama_available() -> bool:
     try:
         # Erhöhter Timeout für Hugging Face Spaces
         response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=10)
-        return response.status_code == 200
-    except:
+        if response.status_code == 200:
+            return True
+        else:
+            print(f"Ollama check failed: Status {response.status_code}, URL: {OLLAMA_BASE_URL}")
+            return False
+    except requests.exceptions.Timeout:
+        print(f"Ollama timeout: URL {OLLAMA_BASE_URL}")
+        return False
+    except requests.exceptions.ConnectionError as e:
+        print(f"Ollama connection error: {e}, URL: {OLLAMA_BASE_URL}")
+        return False
+    except Exception as e:
+        print(f"Ollama check error: {e}, URL: {OLLAMA_BASE_URL}")
         return False
 
 def get_available_models() -> List[str]:
@@ -34,9 +45,11 @@ def get_available_models() -> List[str]:
         response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=15)
         if response.status_code == 200:
             data = response.json()
-            return [model['name'] for model in data.get('models', [])]
-    except:
-        pass
+            models = [model['name'] for model in data.get('models', [])]
+            # Entferne :latest Suffix für bessere Lesbarkeit
+            return [m.replace(':latest', '') if ':latest' in m else m for m in models]
+    except Exception as e:
+        print(f"Error getting models: {e}")
     return []
 
 def download_model(model_name: str = "llama3.2") -> bool:
