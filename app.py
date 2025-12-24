@@ -1302,13 +1302,196 @@ elif page == "📈 Analytics":
 
 # AI ASSISTANT
 elif page == "🤖 AI Assistant":
+    # ChatGPT-ähnliches Design CSS
     st.markdown("""
-        <div style='text-align: center; padding: 1rem 0; margin-bottom: 2rem;'>
-            <h1 style='font-size: 2.5rem; font-weight: 600; color: #2c3e50;'>🤖 AI Sales Assistant</h1>
-            <p style='color: #7f8c8d; font-size: 1rem;'>Intelligente Unterstützung für Ihren Salon</p>
-        </div>
+        <style>
+        /* ChatGPT-ähnliches Design */
+        .chatgpt-container {
+            max-width: 768px;
+            margin: 0 auto;
+            padding: 0;
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chatgpt-header {
+            text-align: center;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #e5e5e5;
+            margin-bottom: 0;
+            background: #ffffff;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .chatgpt-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .chatgpt-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem 0;
+            background: #ffffff;
+            scroll-behavior: smooth;
+        }
+        
+        .chatgpt-message {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem 1rem;
+            margin-bottom: 0;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .chatgpt-message.user {
+            background: #ffffff;
+        }
+        
+        .chatgpt-message.assistant {
+            background: #f7f7f8;
+        }
+        
+        .chatgpt-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        .chatgpt-avatar.user {
+            background: #19c37d;
+            color: white;
+        }
+        
+        .chatgpt-avatar.assistant {
+            background: #ab68ff;
+            color: white;
+        }
+        
+        .chatgpt-content {
+            flex: 1;
+            padding-top: 0.25rem;
+            line-height: 1.75;
+            color: #374151;
+            font-size: 0.95rem;
+        }
+        
+        .chatgpt-input-container {
+            position: sticky;
+            bottom: 0;
+            background: #ffffff;
+            padding: 1rem 0;
+            border-top: 1px solid #e5e5e5;
+            margin-top: auto;
+        }
+        
+        .chatgpt-examples {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            padding: 1rem 0;
+            max-width: 768px;
+            margin: 0 auto;
+        }
+        
+        .chatgpt-example-btn {
+            padding: 0.75rem 1rem;
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.875rem;
+            color: #374151;
+            transition: all 0.2s;
+        }
+        
+        .chatgpt-example-btn:hover {
+            background: #f7f7f8;
+            border-color: #d1d5db;
+        }
+        
+        .chatgpt-empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6b7280;
+        }
+        
+        .chatgpt-empty-state h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .chatgpt-settings {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 101;
+        }
+        
+        /* Streamlit Chat Input Anpassung */
+        .stChatInput {
+            max-width: 768px;
+            margin: 0 auto;
+        }
+        
+        .stChatInput > div {
+            border-radius: 24px;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .stChatInput > div:focus-within {
+            border-color: #10a37f;
+            box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.1);
+        }
+        
+        /* Scrollbar Styling */
+        .chatgpt-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chatgpt-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .chatgpt-messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .chatgpt-messages::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+        
+        /* Hide Streamlit default chat styling */
+        [data-testid="stChatMessage"] {
+            background: transparent !important;
+            padding: 0 !important;
+        }
+        
+        [data-testid="stChatMessage"] > div {
+            background: transparent !important;
+        }
+        </style>
     """, unsafe_allow_html=True)
-    
     
     from ai_assistant import (
         check_ollama_available, 
@@ -1321,62 +1504,61 @@ elif page == "🤖 AI Assistant":
     # Ollama Status prüfen
     ollama_available = check_ollama_available()
     
-    if not ollama_available:
-        st.warning("⚠️ Ollama ist nicht verfügbar!")
-        st.info("""
-        **Ollama installieren und starten:**
+    # Einstellungen in Sidebar
+    with st.sidebar:
+        st.markdown("### ⚙️ Einstellungen")
         
-        1. Ollama herunterladen: https://ollama.ai/download
-        2. Ollama installieren
-        3. Terminal öffnen und ausführen:
-           ```bash
-           ollama serve
-           ```
-        4. In einem neuen Terminal das Modell herunterladen:
-           ```bash
-           ollama pull llama3.2
-           ```
-        
-        Alternativ kannst du auch andere Modelle verwenden:
-        - `llama3.2` (empfohlen, klein und schnell)
-        - `llama3.1`
-        - `mistral`
-        - `phi3`
-        """)
-        
-        if st.button("🔄 Ollama Status prüfen"):
-            st.rerun()
-    else:
-        st.success("✅ Ollama ist verfügbar!")
-        
-        # Verfügbare Modelle anzeigen
-        models = get_available_models()
-        
-        if models:
-            selected_model = st.selectbox("Modell auswählen", models, index=0 if "llama3.2" in models else 0)
-        else:
-            st.warning("Keine Modelle gefunden. Bitte ein Modell herunterladen:")
-            model_to_download = st.text_input("Modellname (z.B. llama3.2)", value="llama3.2")
-            if st.button("📥 Modell herunterladen"):
-                with st.spinner(f"Lade {model_to_download} herunter... Das kann einige Minuten dauern."):
-                    if download_model(model_to_download):
-                        st.success(f"✅ Modell {model_to_download} erfolgreich heruntergeladen!")
-                        st.rerun()
-                    else:
-                        st.error("❌ Fehler beim Herunterladen des Modells")
+        if not ollama_available:
+            st.error("⚠️ Ollama nicht verfügbar")
+            st.info("""
+            **Ollama installieren:**
+            
+            1. Download: https://ollama.ai/download
+            2. Terminal: `ollama serve`
+            3. Modell: `ollama pull llama3.2`
+            """)
+            if st.button("🔄 Status prüfen"):
+                st.rerun()
             selected_model = "llama3.2"
+        else:
+            st.success("✅ Ollama verfügbar")
+            models = get_available_models()
+            
+            if models:
+                selected_model = st.selectbox("Modell", models, index=0 if "llama3.2" in models else 0)
+            else:
+                st.warning("Keine Modelle gefunden")
+                model_to_download = st.text_input("Modellname", value="llama3.2")
+                if st.button("📥 Herunterladen"):
+                    with st.spinner("Lade Modell..."):
+                        if download_model(model_to_download):
+                            st.success("✅ Erfolgreich!")
+                            st.rerun()
+                        else:
+                            st.error("❌ Fehler")
+                selected_model = "llama3.2"
         
-        st.divider()
-        
-        # Chat-Interface
-        st.subheader("💬 Chat mit dem AI Assistant")
-        
-        # Chat-Verlauf initialisieren
-        if 'chat_history' not in st.session_state:
-            st.session_state.chat_history = []
-        
-        # System-Prompt für den AI Assistant
-        system_context = """Du bist ein hilfreicher AI-Assistant für ein Friseur- und Beauty-Salon CRM-System. 
+        st.markdown("---")
+        if st.button("🗑️ Chat löschen"):
+            if 'chat_history' in st.session_state:
+                st.session_state.chat_history = []
+            st.rerun()
+    
+    # ChatGPT-ähnliches Chat-Interface
+    st.markdown("""
+        <div class="chatgpt-container">
+            <div class="chatgpt-header">
+                <h1>💇‍♀️ AI Sales Assistant</h1>
+            </div>
+            <div class="chatgpt-messages" id="chatMessages">
+    """, unsafe_allow_html=True)
+    
+    # Chat-Verlauf initialisieren
+    if 'chat_history' not in st.session_state:
+        st.session_state.chat_history = []
+    
+    # System-Prompt für den AI Assistant
+    system_context = """Du bist ein hilfreicher AI-Assistant für ein Friseur- und Beauty-Salon CRM-System. 
 Du hilfst bei Fragen zu:
 - Kundenverwaltung
 - Terminbuchung
@@ -1386,41 +1568,22 @@ Du hilfst bei Fragen zu:
 - Salon-Management
 
 Antworte immer freundlich, professionell und auf Deutsch."""
+    
+    # CRM-Kontext hinzufügen
+    crm_context = get_crm_context()
+    if crm_context:
+        system_context += f"\n\nAktuelle CRM-Daten:\n{crm_context}"
+    
+    # Chat-Verlauf anzeigen (ChatGPT-Style)
+    if not st.session_state.chat_history:
+        # Leerer Zustand mit Beispiel-Fragen
+        st.markdown("""
+            <div class="chatgpt-empty-state">
+                <h2>Wie kann ich Ihnen helfen?</h2>
+                <p>Stellen Sie Fragen zu Ihrem Salon-CRM oder wählen Sie eine Beispiel-Frage:</p>
+            </div>
+        """, unsafe_allow_html=True)
         
-        # CRM-Kontext hinzufügen
-        crm_context = get_crm_context()
-        if crm_context:
-            system_context += f"\n\nAktuelle CRM-Daten:\n{crm_context}"
-        
-        # Chat-Verlauf anzeigen
-        chat_container = st.container()
-        with chat_container:
-            for message in st.session_state.chat_history:
-                if message['role'] == 'user':
-                    with st.chat_message("user"):
-                        st.write(message['content'])
-                else:
-                    with st.chat_message("assistant"):
-                        st.write(message['content'])
-        
-        # Eingabefeld
-        user_input = st.chat_input("Stelle eine Frage zum CRM-System...")
-        
-        if user_input:
-            # Benutzernachricht hinzufügen
-            st.session_state.chat_history.append({'role': 'user', 'content': user_input})
-            
-            # AI-Antwort generieren
-            with st.spinner("🤖 AI denkt nach..."):
-                full_prompt = f"{system_context}\n\nBenutzer: {user_input}\n\nAssistant:"
-                response = chat_with_llm(full_prompt, model=selected_model)
-                st.session_state.chat_history.append({'role': 'assistant', 'content': response})
-            
-            st.rerun()
-        
-        # Beispiel-Fragen
-        st.divider()
-        st.subheader("💡 Beispiel-Fragen")
         example_questions = [
             "Wie viele Kunden haben wir?",
             "Welche Produkte haben niedrigen Bestand?",
@@ -1430,19 +1593,63 @@ Antworte immer freundlich, professionell und auf Deutsch."""
             "Was sind gute Marketing-Strategien für Salons?"
         ]
         
+        st.markdown('<div class="chatgpt-examples">', unsafe_allow_html=True)
         cols = st.columns(2)
         for i, question in enumerate(example_questions):
             with cols[i % 2]:
-                if st.button(f"❓ {question}", key=f"example_{i}"):
+                if st.button(f"💬 {question}", key=f"example_{i}", use_container_width=True):
                     st.session_state.chat_history.append({'role': 'user', 'content': question})
-                    with st.spinner("🤖 AI denkt nach..."):
+                    with st.spinner("🤖 Denke nach..."):
                         full_prompt = f"{system_context}\n\nBenutzer: {question}\n\nAssistant:"
                         response = chat_with_llm(full_prompt, model=selected_model)
                         st.session_state.chat_history.append({'role': 'assistant', 'content': response})
                     st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        # Nachrichten im ChatGPT-Stil anzeigen
+        for message in st.session_state.chat_history:
+            if message['role'] == 'user':
+                st.markdown(f"""
+                    <div class="chatgpt-message user">
+                        <div class="chatgpt-avatar user">👤</div>
+                        <div class="chatgpt-content">{message['content']}</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                    <div class="chatgpt-message assistant">
+                        <div class="chatgpt-avatar assistant">🤖</div>
+                        <div class="chatgpt-content">{message['content']}</div>
+                    </div>
+                """, unsafe_allow_html=True)
+    
+    st.markdown("</div></div>", unsafe_allow_html=True)
+    
+    # Eingabefeld (ChatGPT-Style)
+    user_input = st.chat_input("Nachricht an AI Assistant...")
+    
+    if user_input:
+        # Benutzernachricht hinzufügen
+        st.session_state.chat_history.append({'role': 'user', 'content': user_input})
         
-        # Chat-Verlauf löschen
-        if st.button("🗑️ Chat-Verlauf löschen"):
-            st.session_state.chat_history = []
-            st.rerun()
+        # AI-Antwort generieren
+        with st.spinner("🤖 Denke nach..."):
+            full_prompt = f"{system_context}\n\nBenutzer: {user_input}\n\nAssistant:"
+            response = chat_with_llm(full_prompt, model=selected_model)
+            st.session_state.chat_history.append({'role': 'assistant', 'content': response})
+        
+        st.rerun()
+    
+    # JavaScript für Auto-Scroll
+    st.markdown("""
+        <script>
+        // Auto-Scroll zum Ende der Nachrichten
+        setTimeout(function() {
+            const messagesDiv = document.getElementById('chatMessages');
+            if (messagesDiv) {
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }, 100);
+        </script>
+    """, unsafe_allow_html=True)
 

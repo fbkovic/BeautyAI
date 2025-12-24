@@ -144,3 +144,4 @@ Ihr Beauty CRM mit SimplyBook.me-ähnlichem Terminbuchungssystem ist jetzt live!
 - Prüfen Sie die Environment Variables
 - Testen Sie die API-Endpunkte direkt
 
+

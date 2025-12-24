@@ -529,7 +529,12 @@ FRONTEND_HTML = """
 async def root():
     """Serve Frontend"""
     ensure_db_initialized()
-    return HTMLResponse(content=FRONTEND_HTML)
+    # Versuche public/index.html zu laden, sonst verwende inline HTML
+    try:
+        with open("public/index.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return HTMLResponse(content=FRONTEND_HTML)
 
 @app.get("/api/health")
 async def health():
