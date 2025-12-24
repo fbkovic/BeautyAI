@@ -87,78 +87,240 @@ FRONTEND_HTML = """
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0e1117; color: #fafafa; min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0e1117;
+            color: #fafafa;
+            min-height: 100vh;
         }
-        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
-        .header { text-align: center; padding: 2rem 0; border-bottom: 1px solid #333; margin-bottom: 2rem; }
-        .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 2rem 0;
+            border-bottom: 1px solid #333333;
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
         .sidebar {
-            position: fixed; left: 0; top: 0; width: 250px; height: 100vh;
-            background: #1e1e1e; border-right: 1px solid #333; padding: 2rem 1rem; overflow-y: auto;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #1e1e1e;
+            border-right: 1px solid #333333;
+            padding: 2rem 1rem;
+            overflow-y: auto;
         }
-        .sidebar h2 { text-align: center; margin-bottom: 2rem; font-size: 1.3rem; }
+        
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.3rem;
+        }
+        
         .nav-item {
-            padding: 1rem; margin: 0.5rem 0; background: #262730; border-radius: 6px;
-            cursor: pointer; transition: all 0.2s; border: 1px solid #3a3a4a;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: #262730;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #3a3a4a;
         }
-        .nav-item:hover { background: #3a3a4a; }
-        .nav-item.active { background: #ff4b4b; border-color: #ff4b4b; }
-        .main-content { margin-left: 250px; padding: 2rem; }
+        
+        .nav-item:hover {
+            background: #3a3a4a;
+        }
+        
+        .nav-item.active {
+            background: #ff4b4b;
+            border-color: #ff4b4b;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        
         .card {
-            background: #1e1e1e; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; border: 1px solid #333;
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #333333;
         }
+        
         .stats-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
+        
         .stat-card {
-            background: #fff; color: #2c3e50; text-align: center; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #2c3e50;
+            background: #ffffff;
+            color: #2c3e50;
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #2c3e50;
         }
-        .stat-card .value { font-size: 2rem; font-weight: 600; margin: 0.5rem 0; }
-        .stat-card .label { font-size: 0.85rem; color: #7f8c8d; }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 0.5rem 0;
+        }
+        
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+        
         .btn {
-            background: #262730; color: #fafafa; border: 1px solid #3a3a4a; border-radius: 6px;
-            padding: 0.5rem 1.5rem; cursor: pointer; font-weight: 500; transition: all 0.2s;
+            background: #262730;
+            color: #fafafa;
+            border: 1px solid #3a3a4a;
+            border-radius: 6px;
+            padding: 0.5rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
         }
-        .btn:hover { background: #3a3a4a; }
-        .btn-primary { background: #ff4b4b; border-color: #ff4b4b; }
-        .btn-primary:hover { background: #ff6b6b; }
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; color: #fafafa; font-weight: 500; }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid #d0d0d0;
-            background: #fff; color: #2c3e50; font-size: 1rem;
+        
+        .btn:hover {
+            background: #3a3a4a;
         }
+        
+        .btn-primary {
+            background: #ff4b4b;
+            border-color: #ff4b4b;
+        }
+        
+        .btn-primary:hover {
+            background: #ff6b6b;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #fafafa;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid #d0d0d0;
+            background: #ffffff;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        
         .table {
-            width: 100%; border-collapse: collapse; background: #1e1e1e; border-radius: 6px; overflow: hidden;
+            width: 100%;
+            border-collapse: collapse;
+            background: #1e1e1e;
+            border-radius: 6px;
+            overflow: hidden;
         }
-        .table th, .table td { padding: 1rem; text-align: left; border-bottom: 1px solid #333; }
-        .table th { background: #262730; font-weight: 600; }
-        .loading { text-align: center; padding: 2rem; color: #b0b0b0; }
-        .error { background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 6px; margin: 1rem 0; }
-        .success { background: #d4edda; color: #155724; padding: 1rem; border-radius: 6px; margin: 1rem 0; }
+        
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #333333;
+        }
+        
+        .table th {
+            background: #262730;
+            font-weight: 600;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #b0b0b0;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
+    
     <script type="text/babel">
         const { useState, useEffect } = React;
+        
         const API_URL = window.location.origin;
         
+        // Dashboard Component
         function Dashboard() {
             const [stats, setStats] = useState(null);
             const [loading, setLoading] = useState(true);
+            
             useEffect(() => {
                 fetch(`${API_URL}/api/stats/today`)
                     .then(res => res.json())
-                    .then(data => { setStats(data); setLoading(false); })
-                    .catch(err => { console.error(err); setLoading(false); });
+                    .then(data => {
+                        setStats(data);
+                        setLoading(false);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        setLoading(false);
+                    });
             }, []);
+            
             if (loading) return <div className="loading">Lade Statistiken...</div>;
-            if (!stats) return <div className="error">Fehler beim Laden</div>;
+            if (!stats) return <div className="error">Fehler beim Laden der Statistiken</div>;
+            
             return (
                 <div>
                     <h2>📊 Dashboard</h2>
@@ -188,17 +350,33 @@ FRONTEND_HTML = """
             );
         }
         
+        // Customers Component
         function Customers() {
             const [customers, setCustomers] = useState([]);
             const [loading, setLoading] = useState(true);
             const [showForm, setShowForm] = useState(false);
-            const [formData, setFormData] = useState({ first_name: '', last_name: '', email: '', phone: '' });
+            const [formData, setFormData] = useState({
+                first_name: '',
+                last_name: '',
+                email: '',
+                phone: '',
+                address: '',
+                notes: ''
+            });
+            
             useEffect(() => {
                 fetch(`${API_URL}/api/customers`)
                     .then(res => res.json())
-                    .then(data => { setCustomers(data); setLoading(false); })
-                    .catch(err => { console.error(err); setLoading(false); });
+                    .then(data => {
+                        setCustomers(data);
+                        setLoading(false);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        setLoading(false);
+                    });
             }, []);
+            
             const handleSubmit = async (e) => {
                 e.preventDefault();
                 try {
@@ -207,14 +385,22 @@ FRONTEND_HTML = """
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(formData)
                     });
+                    const result = await response.json();
                     if (response.ok) {
                         setShowForm(false);
-                        setFormData({ first_name: '', last_name: '', email: '', phone: '' });
-                        fetch(`${API_URL}/api/customers`).then(res => res.json()).then(data => setCustomers(data));
+                        setFormData({ first_name: '', last_name: '', email: '', phone: '', address: '', notes: '' });
+                        // Reload customers
+                        fetch(`${API_URL}/api/customers`)
+                            .then(res => res.json())
+                            .then(data => setCustomers(data));
                     }
-                } catch (err) { console.error(err); }
+                } catch (err) {
+                    console.error(err);
+                }
             };
+            
             if (loading) return <div className="loading">Lade Kunden...</div>;
+            
             return (
                 <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -223,33 +409,59 @@ FRONTEND_HTML = """
                             {showForm ? 'Abbrechen' : '+ Neuer Kunde'}
                         </button>
                     </div>
+                    
                     {showForm && (
                         <div className="card">
                             <h3>Neuer Kunde</h3>
                             <form onSubmit={handleSubmit}>
                                 <div className="form-group">
                                     <label>Vorname *</label>
-                                    <input type="text" value={formData.first_name}
-                                        onChange={(e) => setFormData({...formData, first_name: e.target.value})} required />
+                                    <input
+                                        type="text"
+                                        value={formData.first_name}
+                                        onChange={(e) => setFormData({...formData, first_name: e.target.value})}
+                                        required
+                                    />
                                 </div>
                                 <div className="form-group">
                                     <label>Nachname *</label>
-                                    <input type="text" value={formData.last_name}
-                                        onChange={(e) => setFormData({...formData, last_name: e.target.value})} required />
+                                    <input
+                                        type="text"
+                                        value={formData.last_name}
+                                        onChange={(e) => setFormData({...formData, last_name: e.target.value})}
+                                        required
+                                    />
                                 </div>
                                 <div className="form-group">
                                     <label>E-Mail</label>
-                                    <input type="email" value={formData.email}
-                                        onChange={(e) => setFormData({...formData, email: e.target.value})} />
+                                    <input
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Telefon</label>
+                                    <input
+                                        type="tel"
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                    />
                                 </div>
                                 <button type="submit" className="btn btn-primary">Speichern</button>
                             </form>
                         </div>
                     )}
+                    
                     <div className="card">
                         <table className="table">
                             <thead>
-                                <tr><th>Name</th><th>E-Mail</th><th>Telefon</th><th>Treuepunkte</th></tr>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>E-Mail</th>
+                                    <th>Telefon</th>
+                                    <th>Treuepunkte</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 {customers.map(customer => (
@@ -267,252 +479,315 @@ FRONTEND_HTML = """
             );
         }
         
-        // Terminbuchung Component (SimplyBook.me Stil)
-        function Booking() {
-            const [services, setServices] = useState([]);
-            const [employees, setEmployees] = useState([]);
-            const [selectedService, setSelectedService] = useState(null);
-            const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-            const [availableSlots, setAvailableSlots] = useState([]);
-            const [selectedSlot, setSelectedSlot] = useState(null);
-            const [customerData, setCustomerData] = useState({ first_name: '', last_name: '', email: '', phone: '' });
-            const [loading, setLoading] = useState(false);
-            const [message, setMessage] = useState(null);
-            
-            useEffect(() => {
-                fetch(`${API_URL}/api/services`).then(res => res.json()).then(data => setServices(data));
-                fetch(`${API_URL}/api/employees`).then(res => res.json()).then(data => setEmployees(data));
-            }, []);
-            
-            useEffect(() => {
-                if (selectedService && selectedDate) {
-                    fetch(`${API_URL}/api/booking/available-slots?date=${selectedDate}&service_id=${selectedService.id}`)
-                        .then(res => res.json())
-                        .then(data => setAvailableSlots(data))
-                        .catch(err => console.error(err));
-                }
-            }, [selectedService, selectedDate]);
-            
-            const handleBooking = async (e) => {
-                e.preventDefault();
-                if (!selectedService || !selectedSlot) {
-                    setMessage({ type: 'error', text: 'Bitte Service und Zeit auswählen' });
-                    return;
-                }
-                setLoading(true);
-                try {
-                    const response = await fetch(`${API_URL}/api/booking/book`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            ...customerData,
-                            service_id: selectedService.id,
-                            date: selectedDate,
-                            time: selectedSlot
-                        })
-                    });
-                    const result = await response.json();
-                    if (response.ok) {
-                        setMessage({ type: 'success', text: `✅ Termin erfolgreich gebucht! Buchungsnummer: #${result.id}` });
-                        setCustomerData({ first_name: '', last_name: '', email: '', phone: '' });
-                        setSelectedSlot(null);
-                    } else {
-                        setMessage({ type: 'error', text: result.detail || 'Fehler beim Buchen' });
-                    }
-                } catch (err) {
-                    setMessage({ type: 'error', text: 'Fehler beim Buchen' });
-                }
-                setLoading(false);
-            };
-            
-            return (
-                <div>
-                    <h2>📅 Terminbuchung</h2>
-                    {message && (
-                        <div className={message.type === 'success' ? 'success' : 'error'}>
-                            {message.text}
-                        </div>
-                    )}
-                    <div className="card">
-                        <h3>1. Service auswählen</h3>
-                        <select className="form-group" style={{width: '100%', padding: '0.5rem'}}
-                            onChange={(e) => setSelectedService(services.find(s => s.id == e.target.value))}>
-                            <option value="">-- Service wählen --</option>
-                            {services.map(s => (
-                                <option key={s.id} value={s.id}>
-                                    {s.name} - €{s.price.toFixed(2)} ({s.duration} Min)
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    
-                    {selectedService && (
-                        <>
-                            <div className="card">
-                                <h3>2. Datum wählen</h3>
-                                <input type="date" className="form-group" style={{width: '100%', padding: '0.5rem'}}
-                                    value={selectedDate} min={new Date().toISOString().split('T')[0]}
-                                    onChange={(e) => setSelectedDate(e.target.value)} />
-                            </div>
-                            
-                            {availableSlots.length > 0 && (
-                                <div className="card">
-                                    <h3>3. Uhrzeit wählen</h3>
-                                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.5rem'}}>
-                                        {availableSlots.slice(0, 12).map(slot => (
-                                            <button key={slot} className={`btn ${selectedSlot === slot ? 'btn-primary' : ''}`}
-                                                onClick={() => setSelectedSlot(slot)}>{slot}</button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                            
-                            {selectedSlot && (
-                                <div className="card">
-                                    <h3>4. Ihre Daten</h3>
-                                    <form onSubmit={handleBooking}>
-                                        <div className="form-group">
-                                            <label>Vorname *</label>
-                                            <input type="text" value={customerData.first_name}
-                                                onChange={(e) => setCustomerData({...customerData, first_name: e.target.value})} required />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Nachname *</label>
-                                            <input type="text" value={customerData.last_name}
-                                                onChange={(e) => setCustomerData({...customerData, last_name: e.target.value})} required />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>E-Mail *</label>
-                                            <input type="email" value={customerData.email}
-                                                onChange={(e) => setCustomerData({...customerData, email: e.target.value})} required />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Telefon</label>
-                                            <input type="tel" value={customerData.phone}
-                                                onChange={(e) => setCustomerData({...customerData, phone: e.target.value})} />
-                                        </div>
-                                        <button type="submit" className="btn btn-primary" disabled={loading}>
-                                            {loading ? 'Buche...' : '✅ Termin jetzt buchen'}
-                                        </button>
-                                    </form>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-            );
-        }
-        
-        // AI Assistant Component
+        // AI Assistant Component (ChatGPT-Style)
         function AIAssistant() {
             const [messages, setMessages] = useState([]);
             const [input, setInput] = useState('');
-            const [ollamaStatus, setOllamaStatus] = useState(null);
-            const [models, setModels] = useState([]);
-            const [selectedModel, setSelectedModel] = useState('llama3.2');
             const [loading, setLoading] = useState(false);
+            const [model, setModel] = useState('llama3.2');
+            const [models, setModels] = useState([]);
+            const [ollamaAvailable, setOllamaAvailable] = useState(false);
             
             useEffect(() => {
+                // Prüfe Ollama Status
                 fetch(`${API_URL}/api/ai/status`)
                     .then(res => res.json())
                     .then(data => {
-                        setOllamaStatus(data);
-                        if (data.models.length > 0) {
-                            setModels(data.models);
-                            setSelectedModel(data.models[0]);
+                        setOllamaAvailable(data.available);
+                        setModels(data.models || []);
+                        if (data.models && data.models.length > 0) {
+                            setModel(data.models[0]);
                         }
-                    });
+                    })
+                    .catch(err => console.error(err));
             }, []);
             
             const sendMessage = async () => {
                 if (!input.trim() || loading) return;
-                const userMessage = input;
+                
+                const userMessage = { role: 'user', content: input };
+                setMessages(prev => [...prev, userMessage]);
                 setInput('');
-                setMessages([...messages, { role: 'user', content: userMessage }]);
                 setLoading(true);
                 
                 try {
                     const response = await fetch(`${API_URL}/api/ai/chat`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: userMessage, model: selectedModel })
+                        body: JSON.stringify({ message: input, model: model })
                     });
-                    const result = await response.json();
-                    if (result.response) {
-                        setMessages(prev => [...prev, { role: 'assistant', content: result.response }]);
-                    } else if (result.error) {
-                        setMessages(prev => [...prev, { role: 'assistant', content: result.error }]);
+                    
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        setMessages(prev => [...prev, { role: 'assistant', content: `❌ Fehler: ${data.error}` }]);
+                    } else {
+                        setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
                     }
                 } catch (err) {
-                    setMessages(prev => [...prev, { role: 'assistant', content: 'Fehler beim Senden der Nachricht' }]);
+                    setMessages(prev => [...prev, { role: 'assistant', content: `❌ Fehler beim Senden: ${err.message}` }]);
+                } finally {
+                    setLoading(false);
                 }
-                setLoading(false);
             };
             
+            const exampleQuestions = [
+                "Wie viele Kunden haben wir?",
+                "Welche Produkte haben niedrigen Bestand?",
+                "Wie kann ich mehr Umsatz generieren?",
+                "Welche Dienstleistungen sind am beliebtesten?"
+            ];
+            
             return (
-                <div>
-                    <h2>🤖 AI Assistant</h2>
-                    {ollamaStatus && (
-                        <div className={ollamaStatus.available ? 'success' : 'error'} style={{marginBottom: '1rem'}}>
-                            {ollamaStatus.available ? '✅ Ollama ist verfügbar' : '⚠️ Ollama ist nicht verfügbar'}
-                        </div>
-                    )}
-                    {models.length > 0 && (
-                        <div className="form-group">
-                            <label>Modell:</label>
-                            <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}>
+                <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    height: 'calc(100vh - 200px)',
+                    maxWidth: '768px',
+                    margin: '0 auto',
+                    background: '#ffffff'
+                }}>
+                    {/* Header */}
+                    <div style={{
+                        textAlign: 'center',
+                        padding: '1.5rem',
+                        borderBottom: '1px solid #e5e5e5',
+                        background: '#ffffff',
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 100
+                    }}>
+                        <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#2c3e50', margin: 0 }}>
+                            💇‍♀️ AI Sales Assistant
+                        </h1>
+                        {models.length > 0 && (
+                            <select 
+                                value={model} 
+                                onChange={(e) => setModel(e.target.value)}
+                                style={{
+                                    marginTop: '0.5rem',
+                                    padding: '0.25rem 0.5rem',
+                                    borderRadius: '4px',
+                                    border: '1px solid #d1d5db',
+                                    fontSize: '0.875rem'
+                                }}
+                            >
                                 {models.map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
-                        </div>
-                    )}
-                    <div className="card" style={{height: '400px', overflowY: 'auto', marginBottom: '1rem'}}>
-                        {messages.length === 0 && (
-                            <div style={{color: '#b0b0b0', textAlign: 'center', padding: '2rem'}}>
-                                Stelle eine Frage zum CRM-System...
+                        )}
+                    </div>
+                    
+                    {/* Messages */}
+                    <div style={{
+                        flex: 1,
+                        overflowY: 'auto',
+                        padding: '1.5rem 0',
+                        background: '#ffffff'
+                    }}>
+                        {messages.length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#6b7280' }}>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#2c3e50', marginBottom: '0.5rem' }}>
+                                    Wie kann ich Ihnen helfen?
+                                </h2>
+                                <p>Stellen Sie Fragen zu Ihrem Salon-CRM:</p>
+                                <div style={{ 
+                                    display: 'grid', 
+                                    gridTemplateColumns: 'repeat(2, 1fr)', 
+                                    gap: '0.75rem',
+                                    marginTop: '1.5rem',
+                                    maxWidth: '600px',
+                                    margin: '1.5rem auto 0'
+                                }}>
+                                    {exampleQuestions.map((q, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => {
+                                                setInput(q);
+                                                setTimeout(() => sendMessage(), 100);
+                                            }}
+                                            style={{
+                                                padding: '0.75rem 1rem',
+                                                background: '#ffffff',
+                                                border: '1px solid #e5e5e5',
+                                                borderRadius: '8px',
+                                                cursor: 'pointer',
+                                                textAlign: 'left',
+                                                fontSize: '0.875rem',
+                                                color: '#374151',
+                                                transition: 'all 0.2s'
+                                            }}
+                                            onMouseOver={(e) => {
+                                                e.target.style.background = '#f7f7f8';
+                                                e.target.style.borderColor = '#d1d5db';
+                                            }}
+                                            onMouseOut={(e) => {
+                                                e.target.style.background = '#ffffff';
+                                                e.target.style.borderColor = '#e5e5e5';
+                                            }}
+                                        >
+                                            💬 {q}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            messages.map((msg, idx) => (
+                                <div key={idx} style={{
+                                    display: 'flex',
+                                    gap: '1rem',
+                                    padding: '1.5rem 1rem',
+                                    background: msg.role === 'user' ? '#ffffff' : '#f7f7f8',
+                                    animation: 'fadeIn 0.3s ease-in'
+                                }}>
+                                    <div style={{
+                                        width: '32px',
+                                        height: '32px',
+                                        borderRadius: '4px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '1.2rem',
+                                        flexShrink: 0,
+                                        background: msg.role === 'user' ? '#19c37d' : '#ab68ff',
+                                        color: 'white'
+                                    }}>
+                                        {msg.role === 'user' ? '👤' : '🤖'}
+                                    </div>
+                                    <div style={{
+                                        flex: 1,
+                                        paddingTop: '0.25rem',
+                                        lineHeight: 1.75,
+                                        color: '#374151',
+                                        fontSize: '0.95rem',
+                                        whiteSpace: 'pre-wrap'
+                                    }}>
+                                        {msg.content}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                        {loading && (
+                            <div style={{
+                                display: 'flex',
+                                gap: '1rem',
+                                padding: '1.5rem 1rem',
+                                background: '#f7f7f8'
+                            }}>
+                                <div style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '4px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '1.2rem',
+                                    flexShrink: 0,
+                                    background: '#ab68ff',
+                                    color: 'white'
+                                }}>
+                                    🤖
+                                </div>
+                                <div style={{ flex: 1, paddingTop: '0.25rem', color: '#6b7280' }}>
+                                    Denke nach...
+                                </div>
                             </div>
                         )}
-                        {messages.map((msg, idx) => (
-                            <div key={idx} style={{marginBottom: '1rem', padding: '0.5rem',
-                                background: msg.role === 'user' ? '#262730' : '#1e1e1e',
-                                borderRadius: '6px'}}>
-                                <strong>{msg.role === 'user' ? 'Sie' : 'AI'}:</strong> {msg.content}
-                            </div>
-                        ))}
-                        {loading && <div className="loading">AI denkt nach...</div>}
                     </div>
-                    <div style={{display: 'flex', gap: '0.5rem'}}>
-                        <input type="text" className="form-group" style={{flex: 1, padding: '0.5rem'}}
-                            value={input} onChange={(e) => setInput(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                            placeholder="Frage stellen..." />
-                        <button className="btn btn-primary" onClick={sendMessage} disabled={loading || !ollamaStatus?.available}>
-                            Senden
-                        </button>
+                    
+                    {/* Input */}
+                    <div style={{
+                        padding: '1rem',
+                        borderTop: '1px solid #e5e5e5',
+                        background: '#ffffff'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            gap: '0.5rem',
+                            maxWidth: '768px',
+                            margin: '0 auto'
+                        }}>
+                            <input
+                                type="text"
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                                placeholder="Nachricht an AI Assistant..."
+                                disabled={loading || !ollamaAvailable}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem 1rem',
+                                    borderRadius: '24px',
+                                    border: '1px solid #d1d5db',
+                                    fontSize: '0.95rem',
+                                    outline: 'none',
+                                    transition: 'all 0.2s'
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = '#10a37f';
+                                    e.target.style.boxShadow = '0 0 0 3px rgba(16, 163, 127, 0.1)';
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = '#d1d5db';
+                                    e.target.style.boxShadow = 'none';
+                                }}
+                            />
+                            <button
+                                onClick={sendMessage}
+                                disabled={loading || !input.trim() || !ollamaAvailable}
+                                style={{
+                                    padding: '0.75rem 1.5rem',
+                                    background: ollamaAvailable && input.trim() ? '#10a37f' : '#d1d5db',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '24px',
+                                    cursor: ollamaAvailable && input.trim() ? 'pointer' : 'not-allowed',
+                                    fontWeight: 500,
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                Senden
+                            </button>
+                        </div>
+                        {!ollamaAvailable && (
+                            <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#dc2626', textAlign: 'center' }}>
+                                ⚠️ Ollama ist nicht verfügbar. Bitte Ollama installieren und starten.
+                            </p>
+                        )}
                     </div>
                 </div>
             );
         }
         
+        // App Component
         function App() {
             const [currentPage, setCurrentPage] = useState('dashboard');
+            
             const pages = {
                 dashboard: { name: '📊 Dashboard', component: Dashboard },
                 customers: { name: '👥 Kunden', component: Customers },
-                booking: { name: '📅 Terminbuchung', component: Booking },
                 ai: { name: '🤖 AI Assistant', component: AIAssistant }
             };
+            
             const CurrentComponent = pages[currentPage]?.component || Dashboard;
+            
             return (
                 <div>
                     <div className="sidebar">
                         <h2>💇‍♀️ Salon CRM</h2>
                         {Object.entries(pages).map(([key, page]) => (
-                            <div key={key} className={`nav-item ${currentPage === key ? 'active' : ''}`}
-                                onClick={() => setCurrentPage(key)}>{page.name}</div>
+                            <div
+                                key={key}
+                                className={`nav-item ${currentPage === key ? 'active' : ''}`}
+                                onClick={() => setCurrentPage(key)}
+                            >
+                                {page.name}
+                            </div>
                         ))}
                     </div>
                     <div className="main-content">
-                        <div className="container"><CurrentComponent /></div>
+                        <div className="container">
+                            <CurrentComponent />
+                        </div>
                     </div>
                 </div>
             );
@@ -522,6 +797,8 @@ FRONTEND_HTML = """
     </script>
 </body>
 </html>
+
+
 """
 
 # API Routes
@@ -529,12 +806,22 @@ FRONTEND_HTML = """
 async def root():
     """Serve Frontend"""
     ensure_db_initialized()
-    # Versuche public/index.html zu laden, sonst verwende inline HTML
-    try:
-        with open("public/index.html", "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
-    except FileNotFoundError:
-        return HTMLResponse(content=FRONTEND_HTML)
+    # Versuche public/index.html zu laden (verschiedene Pfade für lokale Entwicklung und Vercel)
+    html_paths = [
+        "public/index.html",
+        "/var/task/public/index.html",  # Vercel Lambda
+        os.path.join(os.path.dirname(__file__), "public", "index.html"),  # Relativer Pfad
+    ]
+    
+    for path in html_paths:
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
+        except (FileNotFoundError, OSError):
+            continue
+    
+    # Fallback: Verwende inline HTML (sollte aktualisiert sein)
+    return HTMLResponse(content=FRONTEND_HTML)
 
 @app.get("/api/health")
 async def health():
