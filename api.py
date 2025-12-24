@@ -1048,6 +1048,7 @@ async def ai_status():
     """Prüft Ollama Status"""
     from ai_assistant import OLLAMA_BASE_URL
     import os
+    import requests
     
     # Debug: Prüfe Environment Variable
     env_url = os.getenv("OLLAMA_BASE_URL", "NOT SET")
@@ -1055,29 +1056,45 @@ async def ai_status():
     available = check_ollama_available()
     models = []
     error_msg = None
+    test_response = None
     
     if available:
         models = get_available_models()
     else:
         # Versuche direkten Test für bessere Fehlermeldung
         try:
-            import requests
-            response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=10)
+            headers = {
+                'User-Agent': 'Beauty-CRM/1.0',
+                'Accept': 'application/json'
+            }
+            response = requests.get(
+                f"{OLLAMA_BASE_URL}/api/tags", 
+                timeout=15,
+                headers=headers
+            )
+            test_response = {
+                "status_code": response.status_code,
+                "url": OLLAMA_BASE_URL,
+                "response_preview": response.text[:200] if response.text else None
+            }
             if response.status_code != 200:
-                error_msg = f"HTTP {response.status_code}"
+                error_msg = f"HTTP {response.status_code}: {response.text[:100]}"
         except requests.exceptions.Timeout:
-            error_msg = "Timeout (10s)"
+            error_msg = "Timeout (15s) - Hugging Face Spaces könnte im Cold Start sein"
         except requests.exceptions.ConnectionError as e:
-            error_msg = f"Connection Error: {str(e)[:100]}"
+            error_msg = f"Connection Error: {str(e)[:150]}"
+        except requests.exceptions.SSLError as e:
+            error_msg = f"SSL Error: {str(e)[:150]}"
         except Exception as e:
-            error_msg = f"Error: {str(e)[:100]}"
+            error_msg = f"{type(e).__name__}: {str(e)[:150]}"
     
     return {
         "available": available,
         "models": models,
         "ollama_url": OLLAMA_BASE_URL,
         "env_url": env_url,
-        "error": error_msg if not available else None
+        "error": error_msg if not available else None,
+        "test_response": test_response if not available else None
     }
 
 @app.post("/api/ai/chat")
