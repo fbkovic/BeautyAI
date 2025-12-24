@@ -134,11 +134,14 @@ def chat_with_llm(prompt: str, model: str = "llama3.2", context: Optional[str] =
     # Versuche zuerst Ollama
     if not USE_CLOUD_API and check_ollama_available():
         try:
+            # Normalisiere Model-Name (füge :latest hinzu falls nicht vorhanden)
+            model_name = model if ':' in model else f"{model}:latest"
+            
             # Erhöhter Timeout für Hugging Face Spaces (kann bei Cold Start länger dauern)
             response = requests.post(
                 f"{OLLAMA_BASE_URL}/api/generate",
                 json={
-                    "model": model,
+                    "model": model_name,
                     "prompt": full_prompt,
                     "stream": False
                 },
@@ -148,10 +151,13 @@ def chat_with_llm(prompt: str, model: str = "llama3.2", context: Optional[str] =
             if response.status_code == 200:
                 data = response.json()
                 return data.get('response', 'Keine Antwort erhalten')
+            else:
+                print(f"Ollama API Error: Status {response.status_code}, Response: {response.text[:200]}")
         except requests.exceptions.Timeout:
+            print(f"Ollama Timeout: URL {OLLAMA_BASE_URL}, Model: {model}")
             pass  # Fallback zu Cloud API
         except Exception as e:
-            print(f"Ollama Error: {e}")
+            print(f"Ollama Error: {e}, URL: {OLLAMA_BASE_URL}")
     
     # Fallback zu Cloud APIs
     if OPENAI_API_KEY:

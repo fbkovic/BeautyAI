@@ -1030,11 +1030,37 @@ async def get_week_calendar(start_date: str):
 async def ai_status():
     """Prüft Ollama Status"""
     from ai_assistant import OLLAMA_BASE_URL
+    import os
+    
+    # Debug: Prüfe Environment Variable
+    env_url = os.getenv("OLLAMA_BASE_URL", "NOT SET")
+    
     available = check_ollama_available()
+    models = []
+    error_msg = None
+    
+    if available:
+        models = get_available_models()
+    else:
+        # Versuche direkten Test für bessere Fehlermeldung
+        try:
+            import requests
+            response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=10)
+            if response.status_code != 200:
+                error_msg = f"HTTP {response.status_code}"
+        except requests.exceptions.Timeout:
+            error_msg = "Timeout (10s)"
+        except requests.exceptions.ConnectionError as e:
+            error_msg = f"Connection Error: {str(e)[:100]}"
+        except Exception as e:
+            error_msg = f"Error: {str(e)[:100]}"
+    
     return {
         "available": available,
-        "models": get_available_models() if available else [],
-        "ollama_url": OLLAMA_BASE_URL if available else None
+        "models": models,
+        "ollama_url": OLLAMA_BASE_URL,
+        "env_url": env_url,
+        "error": error_msg if not available else None
     }
 
 @app.post("/api/ai/chat")
