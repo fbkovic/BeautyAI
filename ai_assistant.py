@@ -11,7 +11,8 @@ import os
 # Ollama URL - kann über Environment-Variable konfiguriert werden
 # Für lokale Entwicklung: http://localhost:11434
 # Für Cloud: https://your-ollama-server.com
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+# Wichtig: strip() entfernt Newlines und Leerzeichen am Anfang/Ende
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").strip()
 
 # Cloud LLM APIs als Fallback
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
