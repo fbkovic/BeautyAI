@@ -493,13 +493,22 @@ FRONTEND_HTML = """
                 fetch(`${API_URL}/api/ai/status`)
                     .then(res => res.json())
                     .then(data => {
+                        console.log('Ollama Status:', data);
                         setOllamaAvailable(data.available);
                         setModels(data.models || []);
                         if (data.models && data.models.length > 0) {
                             setModel(data.models[0]);
                         }
+                        // Zeige Fehler in Konsole
+                        if (!data.available && data.error) {
+                            console.error('Ollama Error:', data.error);
+                            console.log('Ollama URL:', data.ollama_url);
+                            console.log('Env URL:', data.env_url);
+                        }
                     })
-                    .catch(err => console.error(err));
+                    .catch(err => {
+                        console.error('Status Check Error:', err);
+                    });
             }, []);
             
             const sendMessage = async () => {
@@ -753,9 +762,17 @@ FRONTEND_HTML = """
                             </button>
                         </div>
                         {!ollamaAvailable && (
-                            <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#ff6b6b', textAlign: 'center' }}>
-                                ⚠️ Ollama ist nicht verfügbar. Prüfe die Verbindung zu Hugging Face Spaces.
-                            </p>
+                            <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#ff6b6b', textAlign: 'center', padding: '0.5rem', background: '#262730', borderRadius: '4px' }}>
+                                <p style={{ margin: '0 0 0.25rem 0' }}>
+                                    ⚠️ Ollama ist nicht verfügbar
+                                </p>
+                                <p style={{ margin: 0, fontSize: '0.75rem', color: '#b0b0b0' }}>
+                                    URL: https://bigkerem-docker.hf.space
+                                </p>
+                                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: '#b0b0b0' }}>
+                                    Prüfe die Browser-Konsole (F12) für Details
+                                </p>
+                            </div>
                         )}
                     </div>
                 </div>
