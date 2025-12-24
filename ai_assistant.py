@@ -22,34 +22,58 @@ def check_ollama_available() -> bool:
     """Prüft ob Ollama läuft"""
     try:
         # Erhöhter Timeout für Hugging Face Spaces
-        response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=10)
+        # Füge Headers hinzu für bessere Kompatibilität
+        headers = {
+            'User-Agent': 'Beauty-CRM/1.0',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        response = requests.get(
+            f"{OLLAMA_BASE_URL}/api/tags", 
+            timeout=15,  # Erhöht auf 15s für Hugging Face Spaces
+            headers=headers,
+            verify=True  # SSL-Verifikation aktivieren
+        )
         if response.status_code == 200:
             return True
         else:
-            print(f"Ollama check failed: Status {response.status_code}, URL: {OLLAMA_BASE_URL}")
+            print(f"Ollama check failed: Status {response.status_code}, Response: {response.text[:200]}, URL: {OLLAMA_BASE_URL}")
             return False
     except requests.exceptions.Timeout:
-        print(f"Ollama timeout: URL {OLLAMA_BASE_URL}")
+        print(f"Ollama timeout (15s): URL {OLLAMA_BASE_URL}")
         return False
     except requests.exceptions.ConnectionError as e:
         print(f"Ollama connection error: {e}, URL: {OLLAMA_BASE_URL}")
         return False
+    except requests.exceptions.SSLError as e:
+        print(f"Ollama SSL error: {e}, URL: {OLLAMA_BASE_URL}")
+        return False
     except Exception as e:
-        print(f"Ollama check error: {e}, URL: {OLLAMA_BASE_URL}")
+        print(f"Ollama check error: {type(e).__name__}: {e}, URL: {OLLAMA_BASE_URL}")
         return False
 
 def get_available_models() -> List[str]:
     """Holt verfügbare Ollama-Modelle"""
     try:
         # Erhöhter Timeout für Hugging Face Spaces
-        response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=15)
+        headers = {
+            'User-Agent': 'Beauty-CRM/1.0',
+            'Accept': 'application/json'
+        }
+        response = requests.get(
+            f"{OLLAMA_BASE_URL}/api/tags", 
+            timeout=15,
+            headers=headers
+        )
         if response.status_code == 200:
             data = response.json()
             models = [model['name'] for model in data.get('models', [])]
             # Entferne :latest Suffix für bessere Lesbarkeit
             return [m.replace(':latest', '') if ':latest' in m else m for m in models]
+        else:
+            print(f"Error getting models: Status {response.status_code}")
     except Exception as e:
-        print(f"Error getting models: {e}")
+        print(f"Error getting models: {type(e).__name__}: {e}")
     return []
 
 def download_model(model_name: str = "llama3.2") -> bool:
@@ -137,7 +161,15 @@ def chat_with_llm(prompt: str, model: str = "llama3.2", context: Optional[str] =
             # Normalisiere Model-Name (füge :latest hinzu falls nicht vorhanden)
             model_name = model if ':' in model else f"{model}:latest"
             
+            # Headers für bessere Kompatibilität
+            headers = {
+                'User-Agent': 'Beauty-CRM/1.0',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+            
             # Erhöhter Timeout für Hugging Face Spaces (kann bei Cold Start länger dauern)
+            # Vercel Hobby Plan hat 10s Limit, daher reduzieren wir auf 8s für Sicherheit
             response = requests.post(
                 f"{OLLAMA_BASE_URL}/api/generate",
                 json={
@@ -145,19 +177,27 @@ def chat_with_llm(prompt: str, model: str = "llama3.2", context: Optional[str] =
                     "prompt": full_prompt,
                     "stream": False
                 },
-                timeout=120  # 2 Minuten für Hugging Face Spaces
+                headers=headers,
+                timeout=8  # Reduziert für Vercel Hobby Plan (10s Limit)
             )
             
             if response.status_code == 200:
                 data = response.json()
                 return data.get('response', 'Keine Antwort erhalten')
             else:
-                print(f"Ollama API Error: Status {response.status_code}, Response: {response.text[:200]}")
+                error_msg = f"Ollama API Error: Status {response.status_code}"
+                if response.text:
+                    error_msg += f", Response: {response.text[:200]}"
+                print(error_msg)
         except requests.exceptions.Timeout:
-            print(f"Ollama Timeout: URL {OLLAMA_BASE_URL}, Model: {model}")
-            pass  # Fallback zu Cloud API
+            print(f"Ollama Timeout (8s): URL {OLLAMA_BASE_URL}, Model: {model}")
+            return "⏱️ Die Anfrage dauerte zu lange. Hugging Face Spaces könnte im Cold Start sein. Bitte versuchen Sie es erneut."
+        except requests.exceptions.ConnectionError as e:
+            print(f"Ollama Connection Error: {e}, URL: {OLLAMA_BASE_URL}")
+            return f"❌ Verbindungsfehler zu Ollama: {str(e)[:100]}"
         except Exception as e:
-            print(f"Ollama Error: {e}, URL: {OLLAMA_BASE_URL}")
+            print(f"Ollama Error: {type(e).__name__}: {e}, URL: {OLLAMA_BASE_URL}")
+            return f"❌ Fehler: {str(e)[:100]}"
     
     # Fallback zu Cloud APIs
     if OPENAI_API_KEY:
