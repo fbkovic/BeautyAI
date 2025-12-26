@@ -175,11 +175,51 @@ if prompt:
     # Render User Message
     st.session_state.chat_history.append({"role": "user", "content": prompt})
     
-    # AI Logic (Simplified for Demo)
-    response = "Das ist eine Demo-Antwort. Ihre Anfrage wurde verarbeitet."
-    if "termin" in prompt.lower():
-        response = "Ich kann gerne den Kalender öffnen. Soll ich zur Termin-Seite wechseln?"
+    # LLM Interaction
+    try:
+        import requests
+        import os
+        
+        # Determine Ollama URL
+        try:
+            ollama_url = st.secrets["OLLAMA_HOST"]
+        except:
+            ollama_url = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+            
+        # Ensure API endpoint path
+        if not ollama_url.endswith("/api/chat"):
+             ollama_url = f"{ollama_url.rstrip('/')}/api/chat"
+        
+        # Prepare Context
+        context = "" # simplified for brevity, or call get_crm_context() if available
+        # Attempt to import context if easy, else skip
+        try:
+            from ai_assistant import get_crm_context
+            context = get_crm_context()
+        except:
+            pass
+
+        payload = {
+            "model": "llama3.2",
+            "messages": [
+                {"role": "system", "content": f"Du bist der BeautyAI Salon Manager. CRM Context: {context}. Antworte freundlich und kurz auf Deutsch."},
+                {"role": "user", "content": prompt}
+            ],
+            "stream": False
+        }
+        
+        with st.spinner("BeautyAI denkt nach..."):
+            res = requests.post(ollama_url, json=payload, timeout=30) # 30s timeout for Cloud
+            
+        if res.status_code == 200:
+            response_content = res.json()['message']['content']
+            st.session_state.chat_history.append({"role": "assistant", "content": response_content})
+        else:
+            err_msg = f"Fehler: {res.status_code} - Der AI Server hat ein Problem."
+            st.session_state.chat_history.append({"role": "assistant", "content": err_msg})
+            
+    except Exception as e:
+        st.session_state.chat_history.append({"role": "assistant", "content": f"Verbindungsfehler: {str(e)}"})
     
-    st.session_state.chat_history.append({"role": "assistant", "content": response})
     st.rerun()
 

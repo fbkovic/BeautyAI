@@ -1,59 +1,30 @@
-# Dockerfile für Hugging Face Spaces
-# Port 7860 wird von Hugging Face Spaces verwendet
-
+# Use official Ollama image as base
 FROM ollama/ollama:latest
 
-# Überschreibe Entrypoint - Ollama hat ein spezielles Entrypoint das alle CMDs als Befehle interpretiert
-ENTRYPOINT []
+# Set environment variables
+ENV OLLAMA_HOST=0.0.0.0
 
-# Expose Port 7860 (Hugging Face Spaces Standard)
+# Create a user to run the application (security best practice for HF)
+RUN useradd -m -u 1000 user
+USER user
+ENV HOME=/home/user \
+	PATH=/home/user/.local/bin:$PATH
+
+WORKDIR $HOME/app
+
+# Expose port (HF Spaces defaults to 7860, but Ollama uses 11434)
+# We might need a script to run ollama serve and maybe a proxy if HF strictly needs 7860
+# But usually we can map it. For simplicity, let's keep it simple first.
 EXPOSE 7860
 
-# Installiere nginx und curl
-RUN apt-get update && apt-get install -y nginx curl && rm -rf /var/lib/apt/lists/*
+# Install curl for healthcheck/pulling
+USER root
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-# Nginx Konfiguration für Reverse Proxy
-RUN echo 'server { \
-    listen 7860; \
-    server_name _; \
-    location / { \
-        proxy_pass http://localhost:11434; \
-        proxy_set_header Host $host; \
-        proxy_set_header X-Real-IP $remote_addr; \
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
-        proxy_set_header X-Forwarded-Proto $scheme; \
-        proxy_read_timeout 300s; \
-        proxy_connect_timeout 75s; \
-    } \
-}' > /etc/nginx/sites-available/default
+# Copy a startup script
+COPY --chown=user start.sh /start.sh
+RUN chmod +x /start.sh
 
-# Start Script - Startet Ollama, lädt Modell und startet Nginx
-RUN echo '#!/bin/bash\n\
-set -e\n\
-echo "Starting Ollama..."\n\
-ollama serve &\n\
-OLLAMA_PID=$!\n\
-echo "Waiting for Ollama to start..."\n\
-sleep 15\n\
-echo "Testing Ollama connection..."\n\
-for i in {1..10}; do\n\
-    if curl -s http://localhost:11434/api/tags > /dev/null; then\n\
-        echo "Ollama is ready!"\n\
-        break\n\
-    fi\n\
-    echo "Waiting for Ollama... ($i/10)"\n\
-    sleep 2\n\
-done\n\
-echo "Checking for llama3.2 model..."\n\
-if ! ollama list | grep -q llama3.2; then\n\
-    echo "Downloading llama3.2 model..."\n\
-    ollama pull llama3.2 || echo "Model download failed, will retry later"\n\
-else\n\
-    echo "Model llama3.2 already exists"\n\
-fi\n\
-echo "Starting Nginx in foreground..."\n\
-exec nginx -g "daemon off;"' > /start.sh && chmod +x /start.sh
+USER user
 
-# Start Ollama und Nginx
-CMD ["/bin/bash", "/start.sh"]
-
+CMD ["/start.sh"]
