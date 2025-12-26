@@ -164,33 +164,28 @@ def navbar_component(current_page="Dashboard"):
     st.markdown("---")
 
 
-def card_metric_v5(icon, label, value, trend_val=None, trend_label="Than last month"):
+def card_metric_v5(icon, label, value, trend_val=None, trend_label=""):
     """
-    Renders the specific Barber Shop metric card.
-    icon: str (emoji or html)
-    label: str (e.g., "Total Clients")
-    value: str (e.g., "421")
-    trend_val: float (e.g., +4.8)
+    Renders a v5 metric card.
     """
-    
-    trend_html = ""
-    if trend_val is not None:
-        is_up = trend_val >= 0
-        css_class = "trend-up" if is_up else "trend-down"
-        arrow = "↗" if is_up else "↘"
-        sign = "+" if is_up else ""
-        trend_html = f'<span class="metric-trend {css_class}">{arrow} {sign}{trend_val}%</span>'
-    
+    if trend_val and trend_val > 0:
+        trend_html = f'<span style="color: #5f7a76; background: rgba(132, 165, 157, 0.15); padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">▲ {trend_val}%</span>'
+    elif trend_val and trend_val < 0:
+        trend_html = f'<span style="color: #c08552; background: rgba(230, 184, 162, 0.2); padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">▼ {abs(trend_val)}%</span>'
+    else:
+        trend_html = ""
+
+    # Minimalist Layout (Text Focused)
     st.markdown(f"""
         <div class="css-card">
-            <div class="metric-label">
-                <span style="background: #27272a; padding: 6px; border-radius: 8px;">{icon}</span> 
-                {label}
-            </div>
-            <div class="metric-value">{value}</div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span class="metric-sub">{trend_label}</span>
-                {trend_html}
+            <div style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--secondary-text); font-weight: 500; margin-bottom: 0.25rem;">{label.upper()}</div>
+                    <div style="font-size: 1.75rem; font-weight: 700; color: var(--primary-text); margin-bottom: 0.5rem;">{value}</div>
+                </div>
+                <div>
+                    {trend_html}
+                </div>
             </div>
         </div>
     """, unsafe_allow_html=True)

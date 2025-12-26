@@ -50,12 +50,12 @@ def get_stats():
 
 stats = get_stats()
 
-# Metrics Grid - Compact
+# Metrics Grid - Clean & Minimalist (No Emojis)
 m1, m2, m3, m4 = st.columns(4)
-with m1: card_metric_v5("👥", "Total Clients", str(stats['clients']), 4.8)
-with m2: card_metric_v5("✂️", "Total Services", str(stats['services']), -1.7)
-with m3: card_metric_v5("👨‍💼", "Total Employees", str(stats['employees']), -1.8)
-with m4: card_metric_v5("📅", "Appointments", str(stats['appointments']), 2.4)
+with m1: card_metric_v5("", "Total Clients", str(stats['clients']), 4.8)
+with m2: card_metric_v5("", "Total Services", str(stats['services']), -1.7)
+with m3: card_metric_v5("", "Total Employees", str(stats['employees']), -1.8)
+with m4: card_metric_v5("", "Appointments", str(stats['appointments']), 2.4)
 
 # Charts Section - Compact
 c_chart, c_list = st.columns([2, 1])
@@ -65,7 +65,7 @@ with c_chart:
     <div class="css-card" style="height: 100%;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
             <div><span style="font-weight: 600; font-size: 1rem; color: #4a403a;">Revenue</span></div>
-            <div style="background: #fdfbf7; border-radius: 20px; padding: 2px;">
+            <div style="background: #fdfbf7; border-radius: 20px; padding: 2px; border: 1px solid #e6e2dd;">
                 <span style="padding: 2px 10px; border-radius: 12px; background: #e6e2dd; color: #4a403a; font-size: 0.7rem;">Month</span>
             </div>
         </div>
@@ -108,8 +108,10 @@ with c_list:
         st.markdown(f"""
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #f0ebe6;">
             <div style="display: flex; gap: 8px; align-items: center;">
-                <div style="width: 28px; height: 28px; background: #fdfbf7; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">👤</div>
-                <div style="color: #4a403a; font-size: 0.85rem;">{emp['first_name']} {emp['last_name'][0]}.</div>
+                <div style="width: 32px; height: 32px; background: #fdfbf7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; border: 1px solid #e6e2dd; color: #b08968; font-weight: 600;">
+                    {emp['first_name'][0]}
+                </div>
+                <div style="color: #4a403a; font-size: 0.9rem; font-weight: 500;">{emp['first_name']} {emp['last_name'][0]}.</div>
             </div>
             <div style="color: #b08968; font-size: 0.8rem;">★ 4.9</div>
         </div>
@@ -122,7 +124,7 @@ with c_list:
 
 st.markdown("""
     <div style="margin-top: 3rem; text-align: center;">
-        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; background: linear-gradient(135deg, #4a403a 0%, #b08968 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        <div style="font-size: 2.2rem; font-weight: 600; margin-bottom: 0.5rem; color: #4a403a;">
             BeautyAI Assistant
         </div>
         <div style="color: #9c8c74; margin-bottom: 2rem;">
@@ -147,7 +149,7 @@ for msg in st.session_state.chat_history:
     else:
         st.markdown(f"""
             <div style="display: flex; justify-content: flex-start; margin-bottom: 1rem; gap: 0.5rem;">
-                <div style="min-width: 28px; height: 28px; background: #b08968; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: white;">✨</div>
+                <div style="min-width: 28px; height: 28px; background: #b08968; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: white;">AI</div>
                 <div style="color: #4a403a; line-height: 1.5; padding-top: 0.2rem;">
                     {content}
                 </div>
