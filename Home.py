@@ -207,14 +207,15 @@ div[data-testid="stChatInput"] > div:focus-within {
 
 /* Text color - Fix invisibility! */
 textarea[data-testid="stChatInputTextArea"] {
-    color: #4a403a !important; /* Dark text on White background */
+    color: #000000 !important; /* Pitch Black for maximum contrast */
     caret-color: #b08968 !important;
-    -webkit-text-fill-color: #4a403a !important;
+    -webkit-text-fill-color: #000000 !important;
+    font-weight: 500 !important; /* Slightly bolder */
 }
 
 textarea[data-testid="stChatInputTextArea"]::placeholder {
-    color: #9c8c74 !important; /* Muted brown placeholder */
-    -webkit-text-fill-color: #9c8c74 !important;
+    color: #5d4037 !important; /* Darker brown placeholder */
+    -webkit-text-fill-color: #5d4037 !important;
     opacity: 1 !important;
 }
 
