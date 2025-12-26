@@ -64,9 +64,9 @@ with c_chart:
     st.markdown("""
     <div class="css-card" style="height: 100%;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <div><span style="font-weight: 600; font-size: 1rem; color: white;">Revenue</span></div>
-            <div style="background: #27272a; border-radius: 20px; padding: 2px;">
-                <span style="padding: 2px 10px; border-radius: 12px; background: #3f3f46; color: white; font-size: 0.7rem;">Month</span>
+            <div><span style="font-weight: 600; font-size: 1rem; color: #4a403a;">Revenue</span></div>
+            <div style="background: #fdfbf7; border-radius: 20px; padding: 2px;">
+                <span style="padding: 2px 10px; border-radius: 12px; background: #e6e2dd; color: #4a403a; font-size: 0.7rem;">Month</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -78,11 +78,11 @@ with c_chart:
     })
     
     fig = px.bar(data, x='Month', y='Revenue')
-    fig.update_traces(marker_color='#ef4444', marker_line_width=0, opacity=0.9) # Light Red
+    fig.update_traces(marker_color='#b08968', marker_line_width=0, opacity=0.9) # Earthy Sand
     fig.update_layout(
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#a1a1aa', family="Inter", size=10),
+        font=dict(color='#9c8c74', family="Inter", size=10),
         xaxis=dict(showgrid=False, zeroline=False),
         yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
         margin=dict(l=0, r=0, t=0, b=0),
@@ -96,7 +96,7 @@ with c_list:
     st.markdown("""
     <div class="css-card" style="height: 100%;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <div style="font-weight: 600; font-size: 1rem; color: white;">Top Staff</div>
+            <div style="font-weight: 600; font-size: 1rem; color: #4a403a;">Top Staff</div>
         </div>
     """, unsafe_allow_html=True)
     
@@ -106,12 +106,12 @@ with c_list:
 
     for emp in employees_list:
         st.markdown(f"""
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #27272a;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #f0ebe6;">
             <div style="display: flex; gap: 8px; align-items: center;">
-                <div style="width: 28px; height: 28px; background: #27272a; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">👤</div>
-                <div style="color: #d4d4d8; font-size: 0.85rem;">{emp['first_name']} {emp['last_name'][0]}.</div>
+                <div style="width: 28px; height: 28px; background: #fdfbf7; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">👤</div>
+                <div style="color: #4a403a; font-size: 0.85rem;">{emp['first_name']} {emp['last_name'][0]}.</div>
             </div>
-            <div style="color: #ef4444; font-size: 0.8rem;">★ 4.9</div>
+            <div style="color: #b08968; font-size: 0.8rem;">★ 4.9</div>
         </div>
         """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -122,10 +122,10 @@ with c_list:
 
 st.markdown("""
     <div style="margin-top: 3rem; text-align: center;">
-        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; background: linear-gradient(135deg, #4a403a 0%, #b08968 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
             BeautyAI Assistant
         </div>
-        <div style="color: #71717a; margin-bottom: 2rem;">
+        <div style="color: #9c8c74; margin-bottom: 2rem;">
             Der Salon im Griff. Fragen Sie einfach.
         </div>
     </div>
@@ -139,7 +139,7 @@ for msg in st.session_state.chat_history:
     if role == "user":
         st.markdown(f"""
             <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
-                <div style="background: #27272a; color: white; padding: 0.8rem 1.2rem; border-radius: 12px; max-width: 80%; border: 1px solid #3f3f46;">
+                <div style="background: #ffffff; color: #4a403a; padding: 0.8rem 1.2rem; border-radius: 12px; max-width: 80%; border: 1px solid #e6e2dd; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
                     {content}
                 </div>
             </div>
@@ -147,8 +147,8 @@ for msg in st.session_state.chat_history:
     else:
         st.markdown(f"""
             <div style="display: flex; justify-content: flex-start; margin-bottom: 1rem; gap: 0.5rem;">
-                <div style="min-width: 28px; height: 28px; background: #ef4444; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">✨</div>
-                <div style="color: #e4e4e7; line-height: 1.5; padding-top: 0.2rem;">
+                <div style="min-width: 28px; height: 28px; background: #b08968; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: white;">✨</div>
+                <div style="color: #4a403a; line-height: 1.5; padding-top: 0.2rem;">
                     {content}
                 </div>
             </div>

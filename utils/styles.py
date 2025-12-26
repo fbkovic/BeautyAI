@@ -6,20 +6,20 @@ def apply_custom_styles():
         /* Import Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-        /* Barber Shop Theme variables */
+        /* Beauty Salon Earth Theme variables */
         :root {
-            --bg-color: #0d0d0d;           /* Deep Black Background */
-            --card-bg: #1a1a1a;            /* Dark Card Background */
-            --card-border: #2e2e2e;        /* Subtle Border */
+            --bg-color: #fdfbf7;           /* Warm Soft Cream */
+            --card-bg: #ffffff;            /* Pure White Cards */
+            --card-border: #e6e2dd;        /* Soft Beige Border */
             
-            --primary-accent: #ef4444;     /* Light Red Accent (was Orange) */
-            --primary-text: #ffffff;
-            --secondary-text: #a1a1aa;     /* Zinc-400 */
+            --primary-accent: #b08968;     /* Earthy Brown/Sand (Primary) */
+            --primary-text: #4a403a;       /* Dark Coffee Brown */
+            --secondary-text: #9c8c74;     /* Muted Taupe */
             
-            --success-bg: rgba(34, 197, 94, 0.1);
-            --success-text: #22c55e;
-            --danger-bg: rgba(239, 68, 68, 0.1);
-            --danger-text: #ef4444;
+            --success-bg: rgba(132, 165, 157, 0.15); /* Soft Sage Green BG */
+            --success-text: #5f7a76;                 /* Sage Green Text */
+            --danger-bg: rgba(230, 184, 162, 0.2);   /* Soft Muted Terra Cotta BG */
+            --danger-text: #c08552;                  /* Muted Terra Cotta Text */
         }
 
         /* Global Reset */
@@ -42,7 +42,7 @@ def apply_custom_styles():
         .nav-container {
             display: flex;
             justify-content: center;
-            background: rgba(13, 13, 13, 0.8);
+            background: rgba(253, 251, 247, 0.9);
             backdrop-filter: blur(12px);
             padding: 1rem 0;
             margin-bottom: 2rem;
@@ -58,8 +58,9 @@ def apply_custom_styles():
             border: 1px solid var(--card-border);
             border-radius: 12px;
             padding: 1.25rem;
-            margin-bottom: 0.75rem; /* Tighter margins */
+            margin-bottom: 0.75rem; 
             height: 100%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02); /* Very subtle shadow */
         }
 
         /* Metrics Styling */
