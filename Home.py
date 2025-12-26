@@ -1,0 +1,185 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+from datetime import datetime
+from database import init_database, execute_query
+from utils.styles import apply_custom_styles, navbar_component, card_metric_v5
+from ai_assistant import get_crm_context, chat_with_llm
+
+# Page Configuration
+st.set_page_config(
+    page_title="Barber Shop",
+    page_icon="💈",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# Initialize
+if 'db_initialized' not in st.session_state:
+    init_database()
+    st.session_state.db_initialized = True
+
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = []
+
+apply_custom_styles()
+
+# --- NAVBAR ---
+navbar_component("Dashboard")
+
+# --- DASHBOARD SECTION (Compact) ---
+# We wrap this in a container that disappears or shrinks if chat gets long? 
+# For now, let's keep it visible at the top as a "Head-Up Display".
+
+st.markdown("<div style='margin-top: -1rem;'></div>", unsafe_allow_html=True) # visual fix
+
+def get_stats():
+    clients = execute_query("SELECT COUNT(*) as c FROM customers")[0]['c']
+    services = execute_query("SELECT COUNT(*) as c FROM services")[0]['c']
+    employees = execute_query("SELECT COUNT(*) as c FROM employees")[0]['c']
+    
+    today = datetime.now().strftime("%Y-%m-%d")
+    appointments = execute_query("SELECT COUNT(*) as c FROM appointments")[0]['c'] 
+    
+    return {
+        "clients": clients,
+        "services": services,
+        "employees": employees,
+        "appointments": appointments
+    }
+
+stats = get_stats()
+
+# Metrics Grid - Compact
+m1, m2, m3, m4 = st.columns(4)
+with m1: card_metric_v5("👥", "Total Clients", str(stats['clients']), 4.8)
+with m2: card_metric_v5("✂️", "Total Services", str(stats['services']), -1.7)
+with m3: card_metric_v5("👨‍💼", "Total Employees", str(stats['employees']), -1.8)
+with m4: card_metric_v5("📅", "Appointments", str(stats['appointments']), 2.4)
+
+# Charts Section - Compact
+c_chart, c_list = st.columns([2, 1])
+
+with c_chart:
+    st.markdown("""
+    <div class="css-card" style="height: 100%;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <div><span style="font-weight: 600; font-size: 1rem; color: white;">Revenue</span></div>
+            <div style="background: #27272a; border-radius: 20px; padding: 2px;">
+                <span style="padding: 2px 10px; border-radius: 12px; background: #3f3f46; color: white; font-size: 0.7rem;">Month</span>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Fake Revenue Data
+    data = pd.DataFrame({
+        "Month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        "Revenue": [1500, 2200, 3100, 1800, 4200, 3900, 2000, 2800, 3500, 2100, 4500, 3200]
+    })
+    
+    fig = px.bar(data, x='Month', y='Revenue')
+    fig.update_traces(marker_color='#ef4444', marker_line_width=0, opacity=0.9) # Light Red
+    fig.update_layout(
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#a1a1aa', family="Inter", size=10),
+        xaxis=dict(showgrid=False, zeroline=False),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        margin=dict(l=0, r=0, t=0, b=0),
+        height=180, # Compact height
+        dragmode=False
+    )
+    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    st.markdown("</div>", unsafe_allow_html=True)
+
+with c_list:
+    st.markdown("""
+    <div class="css-card" style="height: 100%;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <div style="font-weight: 600; font-size: 1rem; color: white;">Top Staff</div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    employees_list = execute_query("SELECT first_name, last_name FROM employees LIMIT 3")
+    if not employees_list:
+        employees_list = [{"first_name": "Mike", "last_name": "M."}, {"first_name": "Sarah", "last_name": "K."}, {"first_name": "Tom", "last_name": "B."}]
+
+    for emp in employees_list:
+        st.markdown(f"""
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #27272a;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <div style="width: 28px; height: 28px; background: #27272a; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">👤</div>
+                <div style="color: #d4d4d8; font-size: 0.85rem;">{emp['first_name']} {emp['last_name'][0]}.</div>
+            </div>
+            <div style="color: #ef4444; font-size: 0.8rem;">★ 4.9</div>
+        </div>
+        """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
+# --- HERO CHAT SECTION ---
+# This sits below the dashboard, acting as the main interaction point.
+
+st.markdown("""
+    <div style="margin-top: 3rem; text-align: center;">
+        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            BeautyAI Assistant
+        </div>
+        <div style="color: #71717a; margin-bottom: 2rem;">
+            Der Salon im Griff. Fragen Sie einfach.
+        </div>
+    </div>
+""", unsafe_allow_html=True)
+
+# Chat History Display
+for msg in st.session_state.chat_history:
+    role = msg["role"]
+    content = msg["content"]
+    
+    if role == "user":
+        st.markdown(f"""
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                <div style="background: #27272a; color: white; padding: 0.8rem 1.2rem; border-radius: 12px; max-width: 80%; border: 1px solid #3f3f46;">
+                    {content}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown(f"""
+            <div style="display: flex; justify-content: flex-start; margin-bottom: 1rem; gap: 0.5rem;">
+                <div style="min-width: 28px; height: 28px; background: #ef4444; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">✨</div>
+                <div style="color: #e4e4e7; line-height: 1.5; padding-top: 0.2rem;">
+                    {content}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+# --- CHAT INPUT ---
+st.markdown("""
+<style>
+[data-testid="stChatInput"] {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    min-width: 320px;
+    z-index: 200;
+}
+</style>
+""", unsafe_allow_html=True)
+
+prompt = st.chat_input("Frage BeautyAI (z.B. 'Neuer Termin um 14 Uhr')...")
+
+if prompt:
+    # Render User Message
+    st.session_state.chat_history.append({"role": "user", "content": prompt})
+    
+    # AI Logic (Simplified for Demo)
+    response = "Das ist eine Demo-Antwort. Ihre Anfrage wurde verarbeitet."
+    if "termin" in prompt.lower():
+        response = "Ich kann gerne den Kalender öffnen. Soll ich zur Termin-Seite wechseln?"
+    
+    st.session_state.chat_history.append({"role": "assistant", "content": response})
+    st.rerun()
+

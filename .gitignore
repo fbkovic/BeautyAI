@@ -1,9 +1,11 @@
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+env/
 build/
 develop-eggs/
 dist/
@@ -22,45 +24,20 @@ wheels/
 
 # Virtual Environment
 venv/
-env/
-ENV/
-env.bak/
-venv.bak/
+.venv/
+.env
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Database
+*.db
+*.sqlite3
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-
-# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Streamlit
-.streamlit/*
-!.streamlit/config.toml
-
-# Logs
-*.log
-
-# Temporary files
-*.tmp
-*.temp
-
-# Environment variables
-.env
-
-.vercel
-.env*.local
+# Mac
+.DS_Store

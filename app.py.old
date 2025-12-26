@@ -251,7 +251,7 @@ nav_options = {
     "💄 Produkte": "💄",
     "🎁 Marketing": "🎁",
     "📈 Analytics": "📈",
-    "🤖 AI Assistant": "🤖"
+    "💬 Frontend Chat": "💬"
 }
 
 page = st.sidebar.radio(
