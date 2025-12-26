@@ -29,13 +29,17 @@ st.markdown("""
     <div style="
         background-color: #b08968; 
         color: white; 
-        padding: 2rem 0; 
+        padding: 4rem 0; 
         margin-top: -6rem; 
         margin-left: -5rem; 
         margin-right: -5rem; 
         margin-bottom: 2rem; 
         text-align: center;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     ">
         <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;">
             BeautyAI Assistant
@@ -48,8 +52,6 @@ st.markdown("""
 
 # --- NAVBAR ---
 navbar_component("Dashboard")
-
-# --- DASHBOARD SECTION ---
 
 # --- DASHBOARD SECTION ---
 
@@ -169,14 +171,20 @@ st.markdown("<div style='margin-bottom: 100px;'></div>", unsafe_allow_html=True)
 
 st.markdown("""
 <style>
+/* Footer Contrast Container */
+.stBottomBlockContainer {
+    background-color: #b08968;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-top: 1px solid #9c8c74;
+}
+
+/* Input Field Styling */
 [data-testid="stChatInput"] {
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60%;
-    min-width: 320px;
+    position: relative;
     z-index: 200;
+    max-width: 800px;
+    margin: 0 auto;
 }
 </style>
 """, unsafe_allow_html=True)
