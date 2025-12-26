@@ -27,7 +27,7 @@ apply_custom_styles()
 # --- HERO CHAT SECTION (At Very Top with Contrast) ---
 st.markdown("""
     <div style="
-        background-color: #b08968; 
+        background: linear-gradient(180deg, #b08968 0%, #8d6e53 100%);
         color: white; 
         padding: 4rem 0; 
         margin-top: -6rem; 
@@ -35,18 +35,19 @@ st.markdown("""
         margin-right: -5rem; 
         margin-bottom: 2rem; 
         text-align: center;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         position: relative;
         z-index: 50;
+        border-bottom: 1px solid #705842;
     ">
-        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; text-shadow: 0 2px 5px rgba(0,0,0,0.2);">
             BeautyAI Assistant
         </div>
-        <div style="font-size: 1.1rem; opacity: 0.95; font-weight: 500;">
+        <div style="font-size: 1.1rem; opacity: 0.95; font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
             Der Salon im Griff. Fragen Sie einfach.
         </div>
     </div>
@@ -175,13 +176,13 @@ st.markdown("""
 <style>
 /* Footer Contrast Container */
 .stBottomBlockContainer {
-    background-color: #b08968;
+    background: linear-gradient(180deg, #b08968 0%, #8d6e53 100%);
     padding-top: 1rem;
     padding-bottom: 1rem;
-    border-top: 1px solid #9c8c74;
+    border-top: 1px solid #705842;
 }
 
-/* Input Field Styling */
+/* Input Field Styling - Wrapper */
 [data-testid="stChatInput"] {
     position: relative;
     z-index: 200;
@@ -189,27 +190,37 @@ st.markdown("""
     margin: 0 auto;
 }
 
-/* Target the text area wrapper to add a strong border/glow */
+/* Input Field Inner Box - Restore visibility */
 div[data-testid="stChatInput"] > div {
-    border: 2px solid white !important;
+    background-color: #ffffff !important; /* Pure White Background */
+    border: 2px solid #705842 !important; /* Proper Contrast Border */
     border-radius: 15px !important;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5) !important;
-    background-color: rgba(255,255,255,0.1) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important; /* Visible Shadow */
 }
 
 /* Focus state */
 div[data-testid="stChatInput"] > div:focus-within {
-    border-color: #fdfbf7 !important;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8) !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4) !important;
+    transform: translateY(-1px);
 }
 
-/* Text color inside input */
+/* Text color - Fix invisibility! */
 textarea[data-testid="stChatInputTextArea"] {
-    color: white !important; /* Make input text white for contrast against brown footer */
-    caret-color: white !important;
+    color: #4a403a !important; /* Dark text on White background */
+    caret-color: #b08968 !important;
+    -webkit-text-fill-color: #4a403a !important;
 }
+
 textarea[data-testid="stChatInputTextArea"]::placeholder {
-    color: rgba(255,255,255,0.7) !important;
+    color: #9c8c74 !important; /* Muted brown placeholder */
+    -webkit-text-fill-color: #9c8c74 !important;
+    opacity: 1 !important;
+}
+
+/* Send Button */
+button[data-testid="stChatInputSubmitButton"] {
+    color: #b08968 !important;
 }
 
 </style>
