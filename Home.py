@@ -27,11 +27,19 @@ apply_custom_styles()
 # --- NAVBAR ---
 navbar_component("Dashboard")
 
-# --- DASHBOARD SECTION (Compact) ---
-# We wrap this in a container that disappears or shrinks if chat gets long? 
-# For now, let's keep it visible at the top as a "Head-Up Display".
+# --- HERO CHAT SECTION (Now at Top) ---
+st.markdown("""
+    <div style="margin-top: 0rem; margin-bottom: 2rem; text-align: center;">
+        <div style="font-size: 2.2rem; font-weight: 600; margin-bottom: 0.5rem; color: #4a403a;">
+            BeautyAI Assistant
+        </div>
+        <div style="color: #9c8c74;">
+            Der Salon im Griff. Fragen Sie einfach.
+        </div>
+    </div>
+""", unsafe_allow_html=True)
 
-st.markdown("<div style='margin-top: -1rem;'></div>", unsafe_allow_html=True) # visual fix
+# --- DASHBOARD SECTION ---
 
 def get_stats():
     clients = execute_query("SELECT COUNT(*) as c FROM customers")[0]['c']
@@ -119,21 +127,9 @@ with c_list:
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-# --- HERO CHAT SECTION ---
-# This sits below the dashboard, acting as the main interaction point.
+# --- CHAT HISTORY & INPUT (Remains at Bottom) ---
+st.markdown("<hr style='border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0)); margin-top: 2rem; margin-bottom: 2rem;'>", unsafe_allow_html=True)
 
-st.markdown("""
-    <div style="margin-top: 3rem; text-align: center;">
-        <div style="font-size: 2.2rem; font-weight: 600; margin-bottom: 0.5rem; color: #4a403a;">
-            BeautyAI Assistant
-        </div>
-        <div style="color: #9c8c74; margin-bottom: 2rem;">
-            Der Salon im Griff. Fragen Sie einfach.
-        </div>
-    </div>
-""", unsafe_allow_html=True)
-
-# Chat History Display
 for msg in st.session_state.chat_history:
     role = msg["role"]
     content = msg["content"]
@@ -156,7 +152,9 @@ for msg in st.session_state.chat_history:
             </div>
         """, unsafe_allow_html=True)
 
-# --- CHAT INPUT ---
+# Add spacing for fixed input
+st.markdown("<div style='margin-bottom: 100px;'></div>", unsafe_allow_html=True)
+
 st.markdown("""
 <style>
 [data-testid="stChatInput"] {
@@ -193,8 +191,7 @@ if prompt:
              ollama_url = f"{ollama_url.rstrip('/')}/api/chat"
         
         # Prepare Context
-        context = "" # simplified for brevity, or call get_crm_context() if available
-        # Attempt to import context if easy, else skip
+        context = "" 
         try:
             from ai_assistant import get_crm_context
             context = get_crm_context()
@@ -211,7 +208,7 @@ if prompt:
         }
         
         with st.spinner("BeautyAI denkt nach..."):
-            res = requests.post(ollama_url, json=payload, timeout=30) # 30s timeout for Cloud
+            res = requests.post(ollama_url, json=payload, timeout=30) 
             
         if res.status_code == 200:
             response_content = res.json()['message']['content']
@@ -224,4 +221,3 @@ if prompt:
         st.session_state.chat_history.append({"role": "assistant", "content": f"Verbindungsfehler: {str(e)}"})
     
     st.rerun()
-
