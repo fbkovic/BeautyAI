@@ -35,16 +35,18 @@ st.markdown("""
         margin-right: -5rem; 
         margin-bottom: 2rem; 
         text-align: center;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        position: relative;
+        z-index: 50;
     ">
-        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;">
+        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             BeautyAI Assistant
         </div>
-        <div style="font-size: 1.1rem; opacity: 0.9;">
+        <div style="font-size: 1.1rem; opacity: 0.95; font-weight: 500;">
             Der Salon im Griff. Fragen Sie einfach.
         </div>
     </div>
@@ -186,6 +188,30 @@ st.markdown("""
     max-width: 800px;
     margin: 0 auto;
 }
+
+/* Target the text area wrapper to add a strong border/glow */
+div[data-testid="stChatInput"] > div {
+    border: 2px solid white !important;
+    border-radius: 15px !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5) !important;
+    background-color: rgba(255,255,255,0.1) !important;
+}
+
+/* Focus state */
+div[data-testid="stChatInput"] > div:focus-within {
+    border-color: #fdfbf7 !important;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Text color inside input */
+textarea[data-testid="stChatInputTextArea"] {
+    color: white !important; /* Make input text white for contrast against brown footer */
+    caret-color: white !important;
+}
+textarea[data-testid="stChatInputTextArea"]::placeholder {
+    color: rgba(255,255,255,0.7) !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
