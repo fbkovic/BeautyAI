@@ -24,20 +24,32 @@ if 'chat_history' not in st.session_state:
 
 apply_custom_styles()
 
-# --- NAVBAR ---
-navbar_component("Dashboard")
-
-# --- HERO CHAT SECTION (Now at Top) ---
+# --- HERO CHAT SECTION (At Very Top with Contrast) ---
 st.markdown("""
-    <div style="margin-top: 0rem; margin-bottom: 2rem; text-align: center;">
-        <div style="font-size: 2.2rem; font-weight: 600; margin-bottom: 0.5rem; color: #4a403a;">
+    <div style="
+        background-color: #b08968; 
+        color: white; 
+        padding: 2rem 0; 
+        margin-top: -6rem; 
+        margin-left: -5rem; 
+        margin-right: -5rem; 
+        margin-bottom: 2rem; 
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    ">
+        <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;">
             BeautyAI Assistant
         </div>
-        <div style="color: #9c8c74;">
+        <div style="font-size: 1.1rem; opacity: 0.9;">
             Der Salon im Griff. Fragen Sie einfach.
         </div>
     </div>
 """, unsafe_allow_html=True)
+
+# --- NAVBAR ---
+navbar_component("Dashboard")
+
+# --- DASHBOARD SECTION ---
 
 # --- DASHBOARD SECTION ---
 
